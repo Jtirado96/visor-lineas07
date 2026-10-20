@@ -1,1 +1,15 @@
-{"actualizado":null,"items":{}}
+{
+ "actualizado": "2026-10-20T19:05:26.833Z",
+ "items": {
+  "CUR-093": {
+   "resultado": "Falta cargar en lineas07",
+   "obs": "Trazado parcialmente dibujado, completar desde Beruti hasta Av. Santa Fe. Plano 19-C-2013 y 9-C-2005.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-20T19:05:26.343Z",
+   "kind": "tr",
+   "hist": []
+  }
+ }
+}
