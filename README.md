@@ -4,7 +4,7 @@ Visor web para hacer el seguimiento del cruce entre las tablas de afectaciones d
 
 - **Tramos del CUR** (CUR-001 a CUR-137), coloreados por estado del cruce o por resultado de la revisión.
 - **lineas07**, por tipo: particularizada, afectación, apertura, servidumbre, rectificación y otros.
-- **Ejes de calle oficiales**, **manzanero CUR 3D** y **secciones catastrales**.
+- **Ejes de calle oficiales** y **manzanero CUR 3D**.
 - **Líneas sin respaldo en el CUR**, agrupadas por su TEXTO (SR-001 a SR-018).
 
 Los ID son los mismos de la planilla `Cruce_CUR_vs_lineas07.xlsx`.
@@ -51,6 +51,40 @@ El token queda guardado solo en ese navegador. No lo configures en una computado
 - **Ver lo que publicaron otros:** tocá **↻**. Con token lo ves al instante; sin token, cuando GitHub Pages termina de actualizar el sitio (uno o dos minutos).
 - **Exportar:** el botón **CSV** baja la tabla completa con las revisiones, separada por punto y coma para abrirla en Excel.
 
+## Cargar lo que vas estudiando
+
+Cada afectación que estudiás se registra en su ficha del visor. Cada registro queda como un commit en GitHub, así se ve el procedimiento completo a lo largo del tiempo.
+
+1. **Buscá la afectación.**
+   - Tramos del cuadro del CUR: pestaña **Tramos CUR**. Podés filtrar por cuadro, estado o calle, o buscar `CUR-0xx` arriba.
+   - Afectaciones que no están en los cuadros (por ejemplo la traza de Av. 27 de Febrero): pestaña **Sin respaldo**.
+2. **Revisá en el mapa.** Al elegirla, el mapa va al tramo y resalta en rosa las líneas de lineas07 vinculadas. Un clic sobre una línea muestra su TIPO, SMP, OBS, plano y TEXTO.
+3. **Completá la revisión** en el panel de abajo:
+   - **Resultado**: Correcto, Falta cargar en lineas07, Corregir tramo/extensión, Corregir distancia, Dar de baja en lineas07 o No aplica. En Sin respaldo: Mantener (otra norma), Dar de baja o Revisar.
+   - **Norma / fundamento**: por ejemplo «Ley 6.628, art. 1° — elimina el tramo del Cuadro 5.4».
+   - **Enlace**: la ficha de normativaba u otra fuente que consultaste.
+   - **Observaciones**: qué verificaste, qué falta y qué corregiste.
+4. **Tocá «Guardar revisión».**
+   - Con el token configurado se publica en el acto, con un commit del tipo «Revisión CUR-026: Falta cargar en lineas07 (tu nombre)».
+   - Sin token queda en tu navegador, y el botón «Guardar en GitHub» muestra cuántas faltan publicar.
+5. **Si cambia tu conclusión, volvé a guardar.** El resultado anterior no se pierde: pasa al **historial** de la ficha.
+6. **Seguí el avance.**
+   - Arriba ves «Revisados N/137».
+   - En **Capas → Por revisión** el mapa colorea los tramos según su resultado.
+   - Con **CSV** bajás la tabla completa para el informe.
+7. **Consultá el procedimiento completo en GitHub.** En el repositorio, la pestaña **Commits** muestra cada revisión publicada, con fecha y autor. El historial de `data/revision.json` muestra qué cambió en cada paso.
+
+## Actualizar las capas cuando corrijas lineas07
+
+Cuando des de baja o corrijas líneas en `lineas07.shp`, el visor sigue mostrando la copia del 15/10/2026 hasta que se regeneren los datos:
+
+1. Exportá de nuevo `lineas07.shp`, con el mismo esquema de object data.
+2. Pasáselo a Claude y pedile que rehaga el cruce y los datos del visor. Así se recalculan el estado de cada tramo, los vínculos con las líneas y los grupos sin respaldo.
+3. Subí al repositorio los archivos nuevos de `data` (**Add file → Upload files**). **No reemplaces `data/revision.json`**: ahí está todo el seguimiento.
+4. Esperá uno o dos minutos y recargá el sitio con Ctrl+F5.
+
+Las revisiones quedan asociadas a los ID (CUR-0xx, SR-0xx). Los CUR-0xx no cambian porque salen de los cuadros del CUR. Los SR-0xx pueden renumerarse si cambian las líneas sin respaldo; en ese caso, Claude conserva el seguimiento al regenerarlos.
+
 ## Mapas base
 
 - **Argenmap gris** y **Argenmap**: Instituto Geográfico Nacional. Es el mapa por defecto.
@@ -76,7 +110,7 @@ Las tres están en CABA-PG07 y se reproyectaron a Web Mercator (EPSG:3857) para 
 | `data/lineas07.json` | Trazado de afectaciones con su object data |
 | `data/ejes.json` | Ejes de calle oficiales (nombre, tipo, alturas) |
 | `data/manzanas.json` | Manzanero (SM, tipo, superficie) |
-| `data/secciones.json`, `data/ciudad.json`, `data/contexto.json` | Secciones catastrales, contorno de la Ciudad y partidos vecinos |
+| `data/ciudad.json`, `data/contexto.json` | Contorno de la Ciudad y partidos vecinos (solo para «Sin mapa base») |
 | `data/cruce.json` | Tramos del CUR, estado del cruce y grupos sin respaldo |
 | `data/revision.json` | Seguimiento (lo escribe el visor) |
 

@@ -85,7 +85,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .cov .m i{display:block;height:100%}
 .review{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--soft);display:grid;gap:8px}
 .review label{font-size:12px;color:var(--muted);display:grid;gap:3px}
-.review select,.review textarea{padding:6px;border:1px solid var(--line);border-radius:5px;background:var(--panel);width:100%}
+.review select,.review textarea,.review input{padding:6px;border:1px solid var(--line);border-radius:5px;background:var(--panel);width:100%}
 .review textarea{min-height:56px;resize:vertical}
 .review .act{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .note{font-size:12px;color:var(--muted)}
@@ -93,7 +93,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .hist li{padding:5px 0;border-top:1px dashed var(--line)}
 .mapwrap{position:relative;min-height:0;min-width:0}
 #map{position:absolute;inset:0;background:var(--water)}
-#cv{position:absolute;inset:0;pointer-events:none;z-index:300}
+#cv{position:absolute;inset:0;pointer-events:none;z-index:450}
 .loading{position:absolute;inset:0;display:grid;place-items:center;z-index:1200;background:color-mix(in srgb,var(--bg) 70%,transparent);font-size:13px;color:var(--muted)}
 .inspector{position:absolute;z-index:1100;left:12px;bottom:max(12px,env(safe-area-inset-bottom,0px));width:min(360px,calc(100% - 24px));background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);padding:10px 12px;max-height:55%;overflow:auto;font-size:12px}
 .inspector h3{margin:0 0 4px;font-size:13px;display:flex;justify-content:space-between;gap:8px}
@@ -198,7 +198,6 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
             <div class="lg">
               <label><input type="checkbox" id="lyEjes" checked><span class="sw" style="border-color:var(--avenue)"></span> Ejes de calle oficiales (nombres desde cerca)</label>
               <label><input type="checkbox" id="lyMz" checked><span class="swf" style="background:var(--block)"></span> Manzanero CUR 3D</label>
-              <label><input type="checkbox" id="lySec" checked><span class="sw" style="border-color:var(--muted);border-top-style:dashed"></span> Secciones catastrales</label>
               <label><input type="checkbox" id="lyCtx" checked><span class="swf" style="background:var(--land-out)"></span> Partidos vecinos y río (solo sin mapa base)</label>
             </div>
           </div>
@@ -245,7 +244,7 @@ const estKind=e=>e==="Completa"?"k-ok":e.startsWith("Completa en")?"k-info":e.st
 const estShort=e=>e.startsWith("Completa en")?"Un solo lado":e.startsWith("Cargada (")?"Cargada, verificar":e.startsWith("Cargada con")?"Otro tipo":e.startsWith("Hay")?"Lejos del tramo":e.startsWith("Sin tramo")?"Sin tramo":e.startsWith("No está")?"No está":e;
 
 /* ---------- state ---------- */
-const st={base:"usig",pending:{},remote:{},tr:[],sr:[],trById:{},srById:{},rev:{},hist:[],sel:null,selKind:null,colorBy:"estado",ly:{tr:true,ejes:true,mz:true,sec:true,ctx:true,l07:{}},canWrite:null,db:null,user:null,me:null,fid2tr:{},fid2sr:{},hl:new Set(),mark:null};
+const st={base:"ign_gris",pending:{},remote:{},tr:[],sr:[],trById:{},srById:{},rev:{},hist:[],sel:null,selKind:null,colorBy:"estado",ly:{tr:true,ejes:true,mz:true,sec:true,ctx:true,l07:{}},canWrite:null,db:null,user:null,me:null,fid2tr:{},fid2sr:{},hl:new Set(),mark:null};
 const D={};
 
 /* ---------- colors from tokens ---------- */
@@ -279,30 +278,33 @@ const Home=L.Control.extend({onAdd(){const d=L.DomUtil.create("div","leaflet-bar
 new Home({position:"topright"}).addTo(map);
 map.setView([-34.615,-58.445],12);
 /* ---------- base maps ---------- */
-const USIG=n=>`https://servicios.usig.buenosaires.gob.ar/mapcache/tms/1.0.0/${n}@GoogleMapsCompatible/{z}/{x}/{-y}.png`;
-const ATT_USIG='Mapa base: <a href="https://usig.buenosaires.gob.ar" target="_blank" rel="noopener">USIG · GCBA</a>';
+const IGN=n=>`https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/${n}@EPSG%3A3857@png/{z}/{x}/{-y}.png`;
+const ATT_IGN='<a href="https://www.ign.gob.ar/" target="_blank" rel="noopener">Argenmap · Instituto Geográfico Nacional</a>';
+const ATT_CARTO='© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
 const BASES=[
-  ["usig","Mapa de la Ciudad (USIG)",USIG("amba_con_transporte_3857"),{maxNativeZoom:18,attribution:ATT_USIG}],
-  ["oficial","Mapa oficial CABA (USIG)",USIG("mapa_oficial_caba_3857"),{maxNativeZoom:18,attribution:ATT_USIG}],
-  ["foto","Foto aérea 2021 (GCBA)",USIG("fotografias_aereas_2021_caba_3857"),{maxNativeZoom:19,attribution:ATT_USIG}],
+  ["ign_gris","Argenmap gris (IGN)",IGN("mapabase_gris"),{maxNativeZoom:18,attribution:ATT_IGN}],
+  ["ign","Argenmap (IGN)",IGN("capabaseargenmap"),{maxNativeZoom:18,attribution:ATT_IGN}],
+  ["carto","Mapa claro (CARTO)","https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxNativeZoom:20,attribution:ATT_CARTO}],
   ["osm","OpenStreetMap","https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxNativeZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">colaboradores de OpenStreetMap</a>'}],
   ["sat","Satélite (Esri World Imagery)","https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,attribution:"Imágenes © Esri, Maxar, Earthstar Geographics"}],
   ["none","Sin mapa base (solo capas propias)",null,{}]];
 let baseLayer=null;
-function setBase(k){if(!BASES.some(b=>b[0]===k))k="usig";st.base=k;try{localStorage.setItem("l07base",k)}catch(e){}
+function setBase(k){if(!BASES.some(b=>b[0]===k))k="ign_gris";st.base=k;try{localStorage.setItem("l07base",k)}catch(e){}
   if(baseLayer){map.removeLayer(baseLayer);baseLayer=null}const b=BASES.find(b=>b[0]===k);
   if(b[2]){baseLayer=L.tileLayer(b[2],Object.assign({maxZoom:21},b[3])).addTo(map)}
   $("#map").style.background=k==="none"?"var(--water)":"var(--bg)";
   const lg=$("#lgBase");if(lg)lg.querySelectorAll("input").forEach(i=>i.checked=i.value===k);draw()}
 const cv=$("#cv"),ctx=cv.getContext("2d");let DPR=1;
+$("#map").appendChild(cv); // over the base-map tiles, under the map controls
 function size(){const r=$("#map").getBoundingClientRect();DPR=window.devicePixelRatio||1;cv.width=Math.round(r.width*DPR);cv.height=Math.round(r.height*DPR);cv.style.width=r.width+"px";cv.style.height=r.height+"px";}
 let raf=0;function draw(){if(raf)return;raf=requestAnimationFrame(()=>{raf=0;render()})}
 map.on("move zoom resize viewreset",draw);
-new ResizeObserver(()=>{map.invalidateSize({pan:false});size();draw()}).observe($(".mapwrap"));
+new ResizeObserver(()=>{map.invalidateSize({pan:false});size();if(D.ready&&!fitted&&!st.sel)fitCity();draw()}).observe($(".mapwrap"));
 const MK=0.5/(Math.PI*6378137);
 function T(){const s=256*Math.pow(2,map.getZoom())*MK;const c=map.latLngToContainerPoint([0,0]);return{s,cx:c.x,cy:c.y}}
 function viewBB(t,pad=0){const w=cv.width/DPR,h=cv.height/DPR;return[(0-t.cx)/t.s-pad,(t.cy-h)/t.s-pad,(w-t.cx)/t.s+pad,(t.cy-0)/t.s+pad]}
-function fitCity(){if(D.cityBB){const b=D.cityBB;map.fitBounds([U(b[0],b[1]),U(b[2],b[3])],{padding:[20,20]})}}
+let fitted=false;
+function fitCity(){if(!D.cityBB)return;const sz=map.getSize();if(sz.x<80||sz.y<80){fitted=false;return}const b=D.cityBB;map.fitBounds([U(b[0],b[1]),U(b[2],b[3])],{padding:[20,20],maxZoom:14});fitted=true}
 function fitBB(b,minPad=70){const p=Math.max(minPad,(b[2]-b[0])*0.15,(b[3]-b[1])*0.15);map.fitBounds([U(b[0]-p,b[1]-p),U(b[2]+p,b[3]+p)],{maxZoom:18})}
 
 let stamp=0;
@@ -327,8 +329,6 @@ function render(){
     ctx.lineWidth=Math.max(0.6,Math.min(3,s*7));ctx.strokeStyle=C.street;ctx.beginPath();for(const f of st1)for(const p of f.parts)pathLine(p,t);ctx.stroke();
     ctx.lineWidth=Math.max(0.8,Math.min(5,s*12));ctx.strokeStyle=C.avenue;ctx.beginPath();for(const f of av)for(const p of f.parts)pathLine(p,t);ctx.stroke();
     ctx.setLineDash([4,3]);ctx.lineWidth=1.2;ctx.strokeStyle=C.rail;ctx.beginPath();for(const f of rl)for(const p of f.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
-  // secciones
-  if(st.ly.sec&&s<0.9){ctx.strokeStyle=C.muted;ctx.globalAlpha=0.7;ctx.lineWidth=1;ctx.setLineDash([5,4]);ctx.beginPath();for(const f of D.sec){if(f.bb[2]<bb[0]||f.bb[0]>bb[2]||f.bb[3]<bb[1]||f.bb[1]>bb[3])continue;for(const poly of f.polys)for(const r of poly){pathLine(r,t);ctx.closePath()}}ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1}
   // tramos (under lineas07)
   if(st.ly.tr){for(const r of st.tr){if(!r.parts.length||r.bb[2]<bb[0]||r.bb[0]>bb[2]||r.bb[3]<bb[1]||r.bb[1]>bb[3])continue;
       const col=st.colorBy==="estado"?estColor(r.estado):revColor(revOf(r.id));
@@ -348,7 +348,6 @@ function render(){
 function txt(str,x,y,font,color,rot){ctx.save();ctx.translate(x,y);if(rot)ctx.rotate(rot);ctx.font=font;ctx.textAlign="center";ctx.textBaseline="middle";ctx.lineWidth=3;ctx.strokeStyle=C.halo;ctx.strokeText(str,0,0);ctx.fillStyle=color;ctx.fillText(str,0,0);ctx.restore()}
 function labels(t,bb){const s=t.s,placed=[];const hit=(r)=>{for(const q of placed)if(r[0]<q[2]&&r[2]>q[0]&&r[1]<q[3]&&r[3]>q[1])return true;placed.push(r);return false};
   if(st.ly.ctx&&st.base==="none"&&s<0.2){for(const f of D.ctx){const x=t.cx+f.lp[0]*s,y=t.cy-f.lp[1]*s;txt(f.name,x,y,`600 12px ${C.ui}`,C.muted)}}
-  if(st.ly.sec&&s>=0.03&&s<0.5){for(const f of D.sec){const x=t.cx+f.lp[0]*s,y=t.cy-f.lp[1]*s;if(x<-50||y<-50||x>cv.width/DPR+50||y>cv.height/DPR+50)continue;txt(String(+f.sec),x,y,`700 ${s>0.12?13:11}px ${C.mono}`,C.muted)}}
   if(st.ly.mz&&s>=1.1){stamp++;query(D.mzG,D.mz,bb,stamp,f=>{const x=t.cx+f.lp[0]*s,y=t.cy-f.lp[1]*s;txt(f.sm,x,y,`500 10px ${C.mono}`,C.muted)})}
   if(st.ly.ejes&&s>=0.32){stamp++;ctx.font=`600 11px ${C.ui}`;const seen=new Map();const W=cv.width/DPR,H=cv.height/DPR;
     query(D.ejG,D.ej,bb,stamp,f=>{if(f.boca||!f.label||f.rail)return;if(!f.av&&s<0.6)return;const p=f.lp;const x=t.cx+p.x*s,y=t.cy-p.y*s;if(x<0||y<0||x>W||y>H)return;
@@ -387,13 +386,12 @@ $("#insp").addEventListener("click",e=>{const a=e.target.closest("[data-go]");if
 /* ---------- data load ---------- */
 async function load(){
   const get=n=>fetch("data/"+n).then(r=>{if(!r.ok)throw new Error(n);return r.json()});
-  const [ej,mz,sec,ctxd,city,l07,cr]=await Promise.all(["ejes.json","manzanas.json","secciones.json","contexto.json","ciudad.json","lineas07.json","cruce.json"].map(get));
+  const [ej,mz,ctxd,city,l07,cr]=await Promise.all(["ejes.json","manzanas.json","contexto.json","ciudad.json","lineas07.json","cruce.json"].map(get));
   D.ej=ej.f.map(a=>{const parts=a[4].map(dec);const f={name:ej.names[a[0]],tipo:ej.tipos[a[1]],boca:a[2],alts:a[3]||null,parts,bb:bboxOf(parts)};f.av=/AVENIDA|AUTOPISTA|BOULEVAR/.test(f.tipo);f.rail=f.tipo==="FERROCARRIL";
     if(f.name&&!/SIN NOMBRE/.test(f.name)&&!f.rail){let best=null;for(const p of parts)for(let i=2;i<p.length;i+=2){const dx=p[i]-p[i-2],dy=p[i+1]-p[i-1],l=Math.hypot(dx,dy);if(!best||l>best.len)best={len:l,x:(p[i]+p[i-2])/2,y:(p[i+1]+p[i-1])/2,ang:Math.atan2(dy,dx)}}f.lp=best;f.label=f.name.replace(/^AV\. /,"Av. ").replace(/\b([A-ZÑÁÉÍÓÚ])([A-ZÑÁÉÍÓÚ]+)/g,(m,a,b)=>a+b.toLowerCase())}
     f.nn=norm(f.name);return f});
   D.ejG=grid(D.ej);
   D.mz=mz.f.map(a=>{const polys=a[4].map(p=>p.map(dec));return{sm:a[0],tipo:a[1],sup:a[2],lp:a[3],polys,bb:bboxOf(polys.flat())}});D.mzG=grid(D.mz);
-  D.sec=sec.f.map(a=>{const polys=a[2].map(p=>p.map(dec));return{sec:a[0],lp:a[1],polys,bb:bboxOf(polys.flat())}});
   D.ctx=ctxd.f.map(a=>{const polys=a[2].map(p=>p.map(dec));return{name:a[0],lp:a[1],polys,bb:bboxOf(polys.flat())}});
   D.city=city.g.map(p=>p.map(dec));D.cityBB=bboxOf(D.city.flat());
   D.l=l07.f.map(a=>{const parts=a[7].map(dec);const tipo=l07.tipos[a[1]];return{fid:a[0],tipo,fam:famOf(tipo),smp:a[2],obs:a[3],plano:a[4],nro:a[5],texto:l07.textos[a[6]],parts,bb:bboxOf(parts)}});D.lG=grid(D.l);
@@ -416,7 +414,7 @@ function buildLegends(){
   legendTr();}
 function legendTr(){const items=st.colorBy==="estado"?[["Completa","Completa"],["Completa en un solo lado","Un solo lado"],["Cargada (verificar extensión)","Cargada, verificar / parcial"],["No está en lineas07","No está en lineas07"],["Sin tramo (revisión manual)","Sin tramo u otro tipo"]].map(([e,n])=>[estColor(e),n]):REV_TR.map(v=>[revColor(v),v]);
   $("#lgTr").innerHTML=items.map(([c,n])=>`<label style="cursor:default"><span class="sw" style="border-color:${c};border-top-width:6px;opacity:.75"></span>${esc(n)}</label>`).join("")}
-[["#lyTr","tr"],["#lyEjes","ejes"],["#lyMz","mz"],["#lySec","sec"],["#lyCtx","ctx"]].forEach(([s,k])=>$(s).addEventListener("change",e=>{st.ly[k]=e.target.checked;draw()}));
+[["#lyTr","tr"],["#lyEjes","ejes"],["#lyMz","mz"],["#lyCtx","ctx"]].forEach(([s,k])=>$(s).addEventListener("change",e=>{st.ly[k]=e.target.checked;draw()}));
 $("#colEst").onclick=()=>{st.colorBy="estado";$("#colEst").setAttribute("aria-pressed","true");$("#colRev").setAttribute("aria-pressed","false");legendTr();draw()};
 $("#colRev").onclick=()=>{st.colorBy="rev";$("#colRev").setAttribute("aria-pressed","true");$("#colEst").setAttribute("aria-pressed","false");legendTr();draw()};
 
@@ -461,20 +459,23 @@ function renderDetail(kind){const host=kind==="tr"?$("#detTr"):$("#detSr");const
     <dl class="kv"><dt>TIPO</dt><dd>${esc(r.tipo)}</dd>${r.desde?`<dt>Tramo (TEXTO)</dt><dd>${esc(r.desde)} – ${esc(r.hasta)}</dd>`:""}<dt>¿Calle en el cuadro?</dt><dd>${r.en_cuadro?"Sí, pero la línea cae fuera del tramo calculado":"No"}</dd>${r.nro?`<dt>NRO_ORD</dt><dd>${esc(r.nro)}</dd>`:""}<dt>OBS</dt><dd>${esc(r.obs)}</dd><dt>SMP</dt><dd class="mono">${esc(r.smp||"—")}</dd><dt>TEXTO</dt><dd>${esc(r.texto||"—")}</dd></dl>`}
   const opts=kind==="tr"?REV_TR:REV_SR;const cur=st.rev[r.id]||{};const pend=!!st.pending[r.id];
   h+=`<div class="review"><label for="revSel">Resultado de la revisión<select id="revSel">${opts.map(o=>`<option ${revOf(r.id)===o?"selected":""}>${esc(o)}</option>`).join("")}</select></label>
-    <label for="revObs">Observaciones<textarea id="revObs" placeholder="Norma consultada, ficha de normativaba, corrección hecha…">${esc(cur.obs||"")}</textarea></label>
+    <label for="revNorma">Norma / fundamento<input id="revNorma" value="${esc(cur.norma||"")}" placeholder="Ej.: Ley 6.628, art. 1° · Ord. 34.870 derogada parcialmente por Ley 5.172"></label>
+    <label for="revLink">Enlace (normativaba u otra fuente)<input id="revLink" type="url" value="${esc(cur.link||"")}" placeholder="https://boletinoficial.buenosaires.gob.ar/normativaba/norma/…"></label>
+    <label for="revObs">Observaciones<textarea id="revObs" placeholder="Qué se verificó, qué falta, corrección hecha en lineas07…">${esc(cur.obs||"")}</textarea></label>
+    ${cur.link&&/^https?:\/\//.test(cur.link)?`<div class="links"><a href="${esc(cur.link)}" target="_blank" rel="noopener">Abrir fuente</a></div>`:""}
     <div class="act"><button class="btn primary" id="revSave" type="button">Guardar revisión</button><span class="note" id="revMsg">${cur.fecha?"Última: "+new Date(cur.fecha).toLocaleString("es-AR")+" · "+esc(cur.por||"—")+(pend?" · sin publicar en GitHub":""):"Sin revisión cargada."}</span></div>
     <ul class="hist" id="histList"></ul></div></div>`;
   host.innerHTML=h;host.hidden=false;host.scrollTop=0;
-  host.dataset.id=r.id;host.dataset.dirty="";const mk=()=>{host.dataset.dirty="1"};$("#revSel").addEventListener("input",mk);$("#revObs").addEventListener("input",mk);
+  host.dataset.id=r.id;host.dataset.dirty="";const mk=()=>{host.dataset.dirty="1"};["#revSel","#revObs","#revNorma","#revLink"].forEach(q=>$(q).addEventListener("input",mk));
   $("#revSave").onclick=()=>saveRev(kind,r.id);fillHist(r.id);}
 function fillHist(id){const ul=$("#histList");if(!ul)return;const items=((st.rev[id]&&st.rev[id].hist)||[]).slice(0,10);
-  ul.innerHTML=items.map(h=>`<li><b>${esc(h.resultado)}</b> · ${h.fecha?new Date(h.fecha).toLocaleString("es-AR"):""} · ${esc(h.por||"—")}${h.obs?`<br>${esc(h.obs)}`:""}</li>`).join("")}
+  ul.innerHTML=items.map(h=>`<li><b>${esc(h.resultado)}</b> · ${h.fecha?new Date(h.fecha).toLocaleString("es-AR"):""} · ${esc(h.por||"—")}${h.norma?`<br>${esc(h.norma)}`:""}${h.obs?`<br>${esc(h.obs)}`:""}</li>`).join("")}
 let resumeSave=null;
-function saveRev(kind,id,vals){const resultado=vals?vals.resultado:$("#revSel").value,obs=vals?vals.obs:$("#revObs").value.trim();const prev=st.rev[id];
-  if(!cfg.nombre){resumeSave={kind,id,vals:{resultado,obs}};openCfg("Antes de guardar, escribí tu nombre: queda en el historial de cada revisión.");return}
+function saveRev(kind,id,vals){const resultado=vals?vals.resultado:$("#revSel").value,obs=vals?vals.obs:$("#revObs").value.trim(),norma=vals?vals.norma:$("#revNorma").value.trim(),link=vals?vals.link:$("#revLink").value.trim();const prev=st.rev[id];
+  if(!cfg.nombre){resumeSave={kind,id,vals:{resultado,obs,norma,link}};openCfg("Antes de guardar, escribí tu nombre: queda en el historial de cada revisión.");return}
   const host=kind==="tr"?$("#detTr"):$("#detSr");host.dataset.dirty="";
-  const hist=[...(prev&&prev.resultado?[{resultado:prev.resultado,obs:prev.obs||"",por:prev.por||"",fecha:prev.fecha||""}]:[]),...((prev&&prev.hist)||[])].slice(0,30);
-  const item={resultado,obs,por:cfg.nombre,fecha:new Date().toISOString(),kind,hist};
+  const hist=[...(prev&&prev.resultado?[{resultado:prev.resultado,obs:prev.obs||"",norma:prev.norma||"",link:prev.link||"",por:prev.por||"",fecha:prev.fecha||""}]:[]),...((prev&&prev.hist)||[])].slice(0,30);
+  const item={resultado,obs,norma,link,por:cfg.nombre,fecha:new Date().toISOString(),kind,hist};
   st.pending[id]=item;LS.set("l07pending",st.pending);st.rev[id]=item;refreshAfterRev();
   if(cfg.token&&cfg.owner&&cfg.repo)publish();else{const m=$("#revMsg");if(m)m.textContent="Guardado en este navegador. Falta publicarlo en GitHub (⚙ para configurar el token)."}}
 
@@ -527,7 +528,7 @@ async function publish(){if(publishing)return;const ids=Object.keys(st.pending);
   publishing=true;$("#syncBtn").disabled=true;say("Publicando en GitHub…");let msgOut="";
   try{for(let attempt=0;attempt<3;attempt++){const {data,sha}=await fetchRemote();const items=Object.assign({},(data&&data.items)||{});
       for(const id of ids){const loc=Object.assign({},st.pending[id]),rem=items[id];loc.hist=(loc.hist||[]).slice();
-        if(rem&&rem.fecha&&rem.fecha!==loc.fecha&&!loc.hist.some(h=>h.fecha===rem.fecha))loc.hist=[{resultado:rem.resultado,obs:rem.obs||"",por:rem.por||"",fecha:rem.fecha},...loc.hist].slice(0,30);
+        if(rem&&rem.fecha&&rem.fecha!==loc.fecha&&!loc.hist.some(h=>h.fecha===rem.fecha))loc.hist=[{resultado:rem.resultado,obs:rem.obs||"",norma:rem.norma||"",link:rem.link||"",por:rem.por||"",fecha:rem.fecha},...loc.hist].slice(0,30);
         items[id]=loc}
       const body={actualizado:new Date().toISOString(),items};
       const msg=ids.length===1?`Revisión ${ids[0]}: ${st.pending[ids[0]].resultado} (${cfg.nombre||"sin nombre"})`:`Revisión de ${ids.length} elementos (${cfg.nombre||"sin nombre"})`;
@@ -556,17 +557,17 @@ function downloadFile(name,text,type){const a=document.createElement("a");a.href
 
 /* ---------- export ---------- */
 function exportCsv(){const sep=";";const q=v=>{v=v==null?"":String(v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};const f=d=>d?new Date(d).toLocaleString("es-AR"):"";
-  const L1=[["ID","Cuadro","Calle","Desde","Hasta","Estado del cruce","Cobertura izq","Cobertura der","Revisión","Observaciones","Revisado por","Fecha revisión"].join(sep)];
-  for(const r of st.tr){const v=st.rev[r.id]||{};L1.push([r.id,r.cuadro,r.calle,r.desde,r.hasta,r.estado,pct(r.cov_izq),pct(r.cov_der),revOf(r.id),v.obs,v.por,f(v.fecha)].map(q).join(sep))}
-  L1.push("");L1.push(["ID","Tipo","TIPO","Calle (TEXTO)","Desde","Hasta","Líneas","Largo m","SMP","Revisión","Observaciones","Revisado por","Fecha revisión"].join(sep));
-  for(const r of st.sr){const v=st.rev[r.id]||{};L1.push([r.id,r.familia,r.tipo,r.calle,r.desde,r.hasta,r.n,String(r.largo).replace(".",","),r.smp,revOf(r.id),v.obs,v.por,f(v.fecha)].map(q).join(sep))}
+  const L1=[["ID","Cuadro","Calle","Desde","Hasta","Estado del cruce","Cobertura izq","Cobertura der","Revisión","Norma / fundamento","Enlace","Observaciones","Revisado por","Fecha revisión"].join(sep)];
+  for(const r of st.tr){const v=st.rev[r.id]||{};L1.push([r.id,r.cuadro,r.calle,r.desde,r.hasta,r.estado,pct(r.cov_izq),pct(r.cov_der),revOf(r.id),v.norma,v.link,v.obs,v.por,f(v.fecha)].map(q).join(sep))}
+  L1.push("");L1.push(["ID","Tipo","TIPO","Calle (TEXTO)","Desde","Hasta","Líneas","Largo m","SMP","Revisión","Norma / fundamento","Enlace","Observaciones","Revisado por","Fecha revisión"].join(sep));
+  for(const r of st.sr){const v=st.rev[r.id]||{};L1.push([r.id,r.familia,r.tipo,r.calle,r.desde,r.hasta,r.n,String(r.largo).replace(".",","),r.smp,revOf(r.id),v.norma,v.link,v.obs,v.por,f(v.fecha)].map(q).join(sep))}
   downloadFile("seguimiento_cruce_CUR_lineas07.csv","﻿"+L1.join("\r\n"),"text/csv;charset=utf-8")}
 $("#exportBtn").onclick=exportCsv;
 
 /* ---------- base map selector ---------- */
 $("#lgBase").innerHTML=BASES.map(([k,n])=>`<label><input type="radio" name="base" value="${k}"> ${esc(n)}</label>`).join("");
 $("#lgBase").addEventListener("change",e=>{if(e.target.name==="base")setBase(e.target.value)});
-let _b="usig";try{_b=localStorage.getItem("l07base")||"usig"}catch(e){}setBase(_b);
+let _b="ign_gris";try{_b=localStorage.getItem("l07base")||"ign_gris"}catch(e){}setBase(_b);
 pendUI();
 size();
 </script>
