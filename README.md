@@ -53,12 +53,13 @@ El token queda guardado solo en ese navegador. No lo configures en una computado
 
 ## Mapas base
 
-- **Mapa de la Ciudad**, **Mapa oficial CABA** y **Foto aérea 2021**: servicio de teselas de USIG (Gobierno de la Ciudad de Buenos Aires).
+- **Argenmap gris** y **Argenmap**: Instituto Geográfico Nacional. Es el mapa por defecto.
+- **Mapa claro**: CARTO, sobre datos de OpenStreetMap.
 - **OpenStreetMap**.
 - **Satélite**: Esri World Imagery.
 - **Sin mapa base**: usa solo las capas propias, con partidos vecinos y río de referencia.
 
-Si el servicio de USIG no responde, elegí otro mapa base en la pestaña **Capas**.
+Los mapas de USIG (GCBA) no se pueden usar desde GitHub Pages. Su servidor de teselas solo funciona por http, y los navegadores bloquean esas imágenes dentro de un sitio https.
 
 ## Datos
 
