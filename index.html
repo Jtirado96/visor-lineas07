@@ -122,6 +122,8 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .edbar .tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .edbar button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.sm{padding:3px 8px;font-size:12px}
+.obsbar{padding:8px 12px;background:var(--info-soft);color:var(--ink);font-size:12.5px;display:grid;gap:4px;border-bottom:1px solid var(--line)}
+.obsbar label{display:flex;gap:6px;align-items:center}
 .btn.danger{border-color:var(--bad);color:var(--bad)}
 .editbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;display:grid;gap:8px}
 .editbox h4,.layers h4.x{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -183,6 +185,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
           <select id="fRev" aria-label="Revisión"><option value="">Toda revisión</option></select>
           <input id="fTxt" type="search" placeholder="Filtrar calle o ID" aria-label="Filtrar tramos">
         </div>
+        <div class="obsbar" id="obsTr" hidden></div>
         <div class="list" id="listTr"><div class="empty">Cargando tramos…</div></div>
         <div class="detail" id="detTr" hidden></div>
       </div>
@@ -368,7 +371,7 @@ function render(){
     ctx.lineWidth=Math.max(0.8,Math.min(5,s*12));ctx.strokeStyle=C.avenue;ctx.beginPath();for(const f of av)for(const p of f.parts)pathLine(p,t);ctx.stroke();
     ctx.setLineDash([4,3]);ctx.lineWidth=1.2;ctx.strokeStyle=C.rail;ctx.beginPath();for(const f of rl)for(const p of f.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
   // tramos (under lineas07)
-  if(st.ly.tr){for(const r of st.tr){if(!r.parts.length||r.bb[2]<bb[0]||r.bb[0]>bb[2]||r.bb[3]<bb[1]||r.bb[1]>bb[3])continue;
+  if(st.ly.tr){for(const r of st.tr){if(!r.parts.length||!trObsOk(r)||r.bb[2]<bb[0]||r.bb[0]>bb[2]||r.bb[3]<bb[1]||r.bb[1]>bb[3])continue;
       const col=st.colorBy==="estado"?estColor(est(r)):revColor(revOf(r.id));
       ctx.strokeStyle=col;ctx.globalAlpha=0.35;ctx.lineWidth=Math.max(5,Math.min(40,(r.halfw||15)*2*s));ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.globalAlpha=1;
       ctx.lineWidth=1.2;ctx.setLineDash([6,4]);ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);}}
@@ -405,7 +408,7 @@ map.on("mousemove",e=>{const p=fromLL(e.latlng.lat,e.latlng.lng);if(p)$("#coords
 map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol=9/t.s;if(ED.on){edMapClick(x,y);return}const bb=[x-tol,y-tol,x+tol,y+tol];
   let best=null,bd=tol;stamp++;
   query(D.lG,D.l,bb,stamp,(f,i)=>{if(!l07Vis(f))return;const d=dParts(f.parts,x,y);if(d<bd){bd=d;best={k:"l",i}}});
-  if(!best&&st.ly.tr){for(const r of st.tr){if(!r.parts.length)continue;const d=dParts(r.parts,x,y);const lim=Math.max(tol,(r.halfw||15));if(d<lim&&d<(best?.d??1e9))best={k:"tr",id:r.id,d}}}
+  if(!best&&st.ly.tr){for(const r of st.tr){if(!r.parts.length||!trObsOk(r))continue;const d=dParts(r.parts,x,y);const lim=Math.max(tol,(r.halfw||15));if(d<lim&&d<(best?.d??1e9))best={k:"tr",id:r.id,d}}}
   if(!best&&st.ly.ejes){stamp++;let b2=tol;query(D.ejG,D.ej,bb,stamp,(f,i)=>{const d=dParts(f.parts,x,y);if(d<b2){b2=d;best={k:"e",i}}})}
   if(!best&&st.ly.mz){stamp++;query(D.mzG,D.mz,[x,y,x,y],stamp,(f,i)=>{for(const poly of f.polys)if(inRing(poly[0],x,y))best={k:"m",i}})}
   st.mark=[x,y];inspect(best,x,y);draw();});
@@ -467,7 +470,14 @@ function buildObs(){const el=$("#lgObs");if(!el||!D.ready)return;const cnt={};D.
   const keys=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]);
   el.innerHTML=keys.map(k=>`<label><input type="checkbox" data-obs="${esc(k)}" ${st.obsOff.has(k)?"":"checked"}>${esc(k)} <span class="note">${cnt[k]}</span></label>`).join("");
   const off=keys.filter(k=>st.obsOff.has(k)).reduce((a,k)=>a+cnt[k],0);$("#obsNote").textContent=off?`Ocultas por OBS: ${off} líneas. El filtro también aplica al clic sobre el mapa.`:"";}
-function setObsOff(keys){st.obsOff=new Set(keys);LS.set("l07obsOff",[...st.obsOff]);buildObs();draw()}
+function setObsOff(keys){st.obsOff=new Set(keys);LS.set("l07obsOff",[...st.obsOff]);buildObs();renderLists();draw()}
+function lineObsOk(fid){const i=D.lByFid.get(fid);const f=i===undefined?null:D.l[i];return !!f&&!f.baja&&!st.obsOff.has(obsKey(f))}
+function trObsOk(r){if(!st.obsOff.size)return true;const fids=cvOf(r).fids||[];if(!fids.length)return !!st.obsSinL;return fids.some(lineObsOk)}
+function obsBar(nShown,nTot){const el=$("#obsTr");if(!st.obsOff.size){el.hidden=true;return}
+  const on=[...new Set(D.l.map(obsKey))].filter(k=>!st.obsOff.has(k));
+  el.hidden=false;el.innerHTML=`<div><b>Filtro OBS activo:</b> ${esc(on.join(", ")||"ninguna OBS")}. Se muestran ${nShown} de ${nTot} tramos: los que tienen líneas vinculadas con esa OBS. <a href="#" id="obsClr">Quitar filtro</a></div>
+  <label><input type="checkbox" id="obsSinL" ${st.obsSinL?"checked":""}> Incluir también los tramos sin líneas en lineas07</label>`;
+  $("#obsClr").onclick=e=>{e.preventDefault();setObsOff([])};$("#obsSinL").onchange=e=>{st.obsSinL=e.target.checked;LS.set("l07obsSinL",st.obsSinL);renderLists();draw()}}
 $("#lgObs").addEventListener("change",e=>{const k=e.target.dataset.obs;if(k===undefined)return;const o=new Set(st.obsOff);e.target.checked?o.delete(k):o.add(k);setObsOff([...o])});
 $("#obsAll").addEventListener("click",e=>{e.preventDefault();setObsOff([])});
 $("#obsEst").addEventListener("click",e=>{e.preventDefault();const ks=new Set(D.l.map(obsKey));setObsOff([...ks].filter(k=>!k.startsWith("EN ESTUDIO")))});
@@ -488,10 +498,11 @@ function buildFilters(){const ests=[...new Set([...st.tr.map(r=>estShort(r.estad
 const revOf=id=>st.rev[id]?.resultado||(id.startsWith("SR")?REV_SR[0]:REV_TR[0]);
 function renderLists(){
   const fc=$("#fCuadro").value,fe=$("#fEstado").value,fr=$("#fRev").value,ft=norm($("#fTxt").value);
-  const rows=st.tr.filter(r=>(!fc||r.cuadro===fc)&&(!fe||estShort(est(r))===fe)&&(!fr||revOf(r.id)===fr)&&(!ft||norm(r.id+" "+r.calle+" "+r.desde+" "+r.hasta).includes(ft)));
+  const rows=st.tr.filter(r=>trObsOk(r)&&(!fc||r.cuadro===fc)&&(!fe||estShort(est(r))===fe)&&(!fr||revOf(r.id)===fr)&&(!ft||norm(r.id+" "+r.calle+" "+r.desde+" "+r.hasta).includes(ft)));
+  obsBar(rows.length,st.tr.length);
   $("#listTr").innerHTML=rows.length?rows.map(r=>`<div class="row${st.selKind==="tr"&&st.sel===r.id?" sel":""}" data-id="${r.id}" tabindex="0" role="button"><span class="id">${r.id}</span><span class="t">${esc(r.calle)}</span><span class="cu">${r.cuadro}</span><span class="s">${esc(r.desde)} – ${esc(r.hasta)}</span><span class="chips"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span>${r.manual?'<span class="chip k-man">manual</span>':""}${r.edited?'<span class="chip k-man">trazado editado</span>':""}<span class="chip ${revKind(revOf(r.id))}">${esc(revOf(r.id))}</span></span></div>`).join(""):'<div class="empty">Ningún tramo coincide con los filtros.</div>';
   const ff=$("#fFam").value,frs=$("#fRevSr").value,fts=norm($("#fTxtSr").value);
-  const srs=st.sr.filter(r=>(!ff||r.familia===ff)&&(!frs||revOf(r.id)===frs)&&(!fts||norm(r.id+" "+r.calle+" "+r.smp+" "+r.texto+" "+r.tipo).includes(fts)));
+  const srs=st.sr.filter(r=>(!st.obsOff.size||(r.fids||[]).some(lineObsOk))&&(!ff||r.familia===ff)&&(!frs||revOf(r.id)===frs)&&(!fts||norm(r.id+" "+r.calle+" "+r.smp+" "+r.texto+" "+r.tipo).includes(fts)));
   $("#listSr").innerHTML=srs.length?srs.map(r=>`<div class="row${st.selKind==="sr"&&st.sel===r.id?" sel":""}" data-id="${r.id}" tabindex="0" role="button"><span class="id">${r.id}</span><span class="t">${esc(srTitle(r))}</span><span class="cu">${r.n} lín.</span><span class="s">${esc(r.familia)}${r.desde?" · "+esc(r.desde)+" – "+esc(r.hasta):""}${r.calle?"":" · SMP "+esc(r.smp.slice(0,60))}</span><span class="chips"><span class="chip ${revKind(revOf(r.id))}">${esc(revOf(r.id))}</span>${r.en_cuadro?'<span class="chip k-info">Calle del cuadro, fuera del tramo</span>':""}</span></div>`).join(""):'<div class="empty">Ninguna línea coincide con los filtros.</div>';
   progress();
 }
@@ -565,7 +576,7 @@ $("#searchForm").addEventListener("submit",e=>{e.preventDefault();if(!D.ready)re
 const LS={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
 const cfg=Object.assign({owner:"",repo:"",branch:"main",token:"",nombre:""},LS.get("l07cfg",{}));
 (function detect(){const h=location.hostname;if(h.endsWith(".github.io")){if(!cfg.owner)cfg.owner=h.split(".")[0];const seg=location.pathname.split("/").filter(Boolean)[0];if(seg&&!cfg.repo&&!/\.html?$/.test(seg))cfg.repo=seg}})();
-st.pending=LS.get("l07pending",{});st.obsOff=new Set(LS.get("l07obsOff",[]));st.remote={};
+st.pending=LS.get("l07pending",{});st.obsOff=new Set(LS.get("l07obsOff",[]));st.obsSinL=LS.get("l07obsSinL",false);st.remote={};
 const b64e=str=>{const by=new TextEncoder().encode(str);let s="";for(let i=0;i<by.length;i+=0x8000)s+=String.fromCharCode.apply(null,by.subarray(i,i+0x8000));return btoa(s)};
 const b64d=b=>{const bin=atob(b.replace(/\s/g,""));const by=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)by[i]=bin.charCodeAt(i);return new TextDecoder().decode(by)};
 const api=(path,opt={})=>fetch(`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${path?"/"+path:""}`,Object.assign({},opt,{cache:"no-store",headers:Object.assign({Accept:"application/vnd.github+json","X-GitHub-Api-Version":"2022-11-28"},cfg.token?{Authorization:"Bearer "+cfg.token}:{},opt.headers||{})}));

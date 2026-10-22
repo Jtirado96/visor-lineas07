@@ -113,6 +113,8 @@ Las revisiones quedan asociadas a los ID (CUR-0xx, SR-0xx). Los CUR-0xx no cambi
 
 En **Capas → lineas07 → Filtrar por OBS** podés mostrar u ocultar las líneas según su OBS (VERIFICADO, EN ESTUDIO, EN ESTUDIO - NO ENTREGAR A CUR, vacío, etc.), con la cantidad de cada una. «solo en estudio» deja visibles únicamente las EN ESTUDIO y «todas» vuelve a mostrar todo. El filtro se combina con el de tipo, también aplica al clic sobre el mapa y se recuerda en el navegador. No afecta las descargas.
 
+Con el filtro activo, las pestañas **Tramos CUR** y **Sin respaldo** (y los tramos del mapa) muestran solo los que tienen al menos una línea vinculada con esa OBS. Una barra arriba de la lista indica cuántos quedan, permite quitar el filtro y, opcionalmente, incluir los tramos que no tienen líneas en lineas07.
+
 ## Mapas base
 
 - **Argenmap gris** y **Argenmap**: Instituto Geográfico Nacional. Es el mapa por defecto.
