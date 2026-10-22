@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T18:03:23.854Z",
+ "actualizado": "2026-10-22T18:05:59.722Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -74,6 +74,43 @@
     }
    ],
    "baja": true
+  },
+  "nmvjuqt4mnb5d": {
+   "nueva": true,
+   "g": [
+    [
+     [
+      23695.101,
+      75575.367
+     ],
+     [
+      23723.094,
+      75624.312
+     ]
+    ]
+   ],
+   "a": {
+    "FeatId1": 0,
+    "ID_PARCELA": 0,
+    "SMP": "",
+    "SECCION": "",
+    "MANZANA": "",
+    "PARCELA": "",
+    "TIPO": "Apertura de calle",
+    "NRO_ORD": "Ord. N°23.475",
+    "OBS": "EN ESTUDIO",
+    "PLANO": "",
+    "TEXTO": "Ord. N°23.475 Apertura de calle DARREGUEYRA desde SANTA FE, AV. hasta JUNCAL."
+   },
+   "por": "Junior",
+   "fecha": "2026-10-22T18:05:59.158Z",
+   "hist": [
+    {
+     "accion": "Línea nueva",
+     "por": "Junior",
+     "fecha": "2026-10-22T18:05:59.158Z"
+    }
+   ]
   }
  },
  "tramos": {
