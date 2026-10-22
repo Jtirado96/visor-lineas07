@@ -109,6 +109,10 @@ Cuando des de baja o corrijas líneas en `lineas07.shp`, el visor sigue mostrand
 
 Las revisiones quedan asociadas a los ID (CUR-0xx, SR-0xx). Los CUR-0xx no cambian porque salen de los cuadros del CUR. Los SR-0xx pueden renumerarse si cambian las líneas sin respaldo; en ese caso, Claude conserva el seguimiento al regenerarlos.
 
+## Filtrar lineas07 por OBS
+
+En **Capas → lineas07 → Filtrar por OBS** podés mostrar u ocultar las líneas según su OBS (VERIFICADO, EN ESTUDIO, EN ESTUDIO - NO ENTREGAR A CUR, vacío, etc.), con la cantidad de cada una. «solo en estudio» deja visibles únicamente las EN ESTUDIO y «todas» vuelve a mostrar todo. El filtro se combina con el de tipo, también aplica al clic sobre el mapa y se recuerda en el navegador. No afecta las descargas.
+
 ## Mapas base
 
 - **Argenmap gris** y **Argenmap**: Instituto Geográfico Nacional. Es el mapa por defecto.
