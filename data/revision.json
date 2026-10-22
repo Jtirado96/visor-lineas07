@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T18:55:40.424Z",
+ "actualizado": "2026-10-22T18:56:44.316Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -45,6 +45,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-22T18:40:49.618Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-007": {
+   "resultado": "Correcto",
+   "obs": "La linea de afectación se encuentra asimétrico respecto del eje de calle.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-22T18:56:43.796Z",
    "kind": "tr",
    "hist": []
   }
