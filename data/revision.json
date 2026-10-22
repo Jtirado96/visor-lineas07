@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T21:40:49.064Z",
+ "actualizado": "2026-10-22T21:43:56.742Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -79,14 +79,22 @@
    "hist": []
   },
   "CUR-066": {
-   "resultado": "Correcto",
-   "obs": "",
+   "resultado": "Corregir tramo/extensión",
+   "obs": "CUR indica que es desde Ancaste hasta Herminio Masantonio, pero en el tramo izquierda llega hasta Grito de Asencio, hay que verificar.",
    "norma": "",
    "link": "",
    "por": "Junior",
-   "fecha": "2026-10-22T21:38:55.626Z",
+   "fecha": "2026-10-22T21:43:56.204Z",
    "kind": "tr",
    "hist": [
+    {
+     "resultado": "Correcto",
+     "obs": "",
+     "norma": "",
+     "link": "",
+     "por": "Junior",
+     "fecha": "2026-10-22T21:38:55.626Z"
+    },
     {
      "resultado": "Correcto",
      "obs": "",
