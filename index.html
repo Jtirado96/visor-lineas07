@@ -122,6 +122,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .edbar .tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
 .edbar button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .btn.sm{padding:3px 8px;font-size:12px}
+.btn.danger{border-color:var(--bad);color:var(--bad)}
 .editbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;display:grid;gap:8px}
 .editbox h4,.layers h4.x{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
 .editbox label,.attr label{font-size:12px;color:var(--muted);display:grid;gap:3px}
@@ -410,7 +411,7 @@ function linksFor(x,y){const ll=U(x,y),la=ll.lat.toFixed(6),lo=ll.lng.toFixed(6)
 function inspect(h,x,y){const el=$("#insp");let html="";
   if(h&&h.k==="l"){const f=D.l[h.i];const trs=st.fid2tr[f.fid]||[],srs=st.fid2sr[f.fid]||[];const A=f.A||{};
     html=`<h3><span>${esc(f.tipo||"(sin tipo)")}${f.baja?' <span class="chip k-bad">dada de baja</span>':""}${f.nueva?' <span class="chip k-info">nueva</span>':""}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(A.SMP||"—")}</dd><dt>Sección · Mz · Parc.</dt><dd class="mono">${esc(A.SECCION||"—")} · ${esc(A.MANZANA||"—")} · ${esc(A.PARCELA||"—")}</dd><dt>OBS</dt><dd>${esc(A.OBS||"—")}</dd><dt>Plano</dt><dd>${esc(A.PLANO||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(A.NRO_ORD||"—")}</dd><dt>TEXTO</dt><dd>${esc(A.TEXTO||"—")}</dd><dt>FID lineas07</dt><dd class="mono">${f.nueva?"nueva":f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd>${f.edit?`<dt>Última edición</dt><dd>${esc(f.edit.por||"")} · ${fmtD(f.edit.fecha)}</dd>`:""}</dl>
-    <div class="lbtns"><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button><button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}">${f.baja?"Reincorporar":"Dar de baja"}</button></div>`;
+    <div class="lbtns"><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button>${f.nueva?`<button class="btn sm" type="button" data-act="del" data-i="${h.i}" title="Borra por completo esta línea nueva">Eliminar línea</button>`:`<button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}" title="Queda marcada para dar de baja en lineas07">${f.baja?"Reincorporar":"Dar de baja"}</button>`}</div>`;
     st.hl=new Set([h.i]);}
   else if(h&&h.k==="tr"){const r=st.trById[h.id];select("tr",r.id,false);html=`<h3><span>${esc(r.id)} · ${esc(r.calle)}</span><button class="x" aria-label="Cerrar">×</button></h3><div>${esc(r.desde)} – ${esc(r.hasta)}</div><div style="margin-top:4px"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span></div>`}
   else if(h&&h.k==="e"){const f=D.ej[h.i];const a=f.alts;html=`<h3><span>${esc(f.name||"(sin nombre)")}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>Tipo</dt><dd>${esc(f.tipo)}${f.boca?" · bocacalle":""}</dd>${a?`<dt>Alturas</dt><dd class="mono">der. ${a[0]}–${a[1]} · izq. ${a[2]}–${a[3]}</dd>`:""}</dl>`;st.hl=new Set()}
@@ -418,6 +419,8 @@ function inspect(h,x,y){const el=$("#insp");let html="";
   else{html=`<h3><span>Punto</span><button class="x" aria-label="Cerrar">×</button></h3>`;st.hl=new Set()}
   el.innerHTML=html+linksFor(x,y);el.hidden=false;}
 $("#insp").addEventListener("click",e=>{const ac=e.target.closest("[data-act]");if(ac){const i=+ac.dataset.i,f=D.l[i];if(!f)return;const c=st.mark||[f.parts[0][0],f.parts[0][1]];
+    if(ac.dataset.act==="del"){if(ac.dataset.sure!=="1"){ac.dataset.sure="1";ac.textContent="¿Seguro? Tocá de nuevo para eliminar";ac.classList.add("danger");return}
+      $("#insp").hidden=true;st.hl=new Set();st.mark=null;undoEdit("l",lineKey(f));say("Línea nueva eliminada");return}
     if(ac.dataset.act==="attr")attrForm(i,c[0],c[1],false);else if(ac.dataset.act==="geom"){$("#insp").hidden=true;startEdit("l",f.fid)}
     else if(ac.dataset.act==="baja")saveEditL(lineKey(f),{baja:true},"Dada de baja");else if(ac.dataset.act==="alta")saveEditL(lineKey(f),{baja:false},"Reincorporada");
     if(ac.dataset.act==="baja"||ac.dataset.act==="alta")setTimeout(()=>{const j=D.lByFid.get(f.fid);if(j!==undefined)inspect({k:"l",i:j},c[0],c[1])},30);return}
@@ -677,7 +680,7 @@ function applyEdits(){if(!D.ready)return;
   const touched=[];
   for(const [k,rec] of Object.entries(st.edL)){
     if(k[0]==="f"){const i=D.lByFid0.get(+k.slice(1));if(i===undefined)continue;const f=D.l[i];touched.push(f.bb0);applyRec(f,rec);touched.push(f.bb)}
-    else if(rec.nueva&&rec.g&&rec.g.length){const f={fid:k,nueva:true,A0:blankA(),parts0:[],bb0:null};f.A=Object.assign({},f.A0);applyRec(f,rec);if(f.parts.length){D.l.push(f);touched.push(f.bb)}}}
+    else if(rec.nueva&&!rec.baja&&rec.g&&rec.g.length){const f={fid:k,nueva:true,A0:blankA(),parts0:[],bb0:null};f.A=Object.assign({},f.A0);applyRec(f,rec);if(f.parts.length){D.l.push(f);touched.push(f.bb)}}}
   D.l.forEach(syncF);D.lG=grid(D.l);D.lByFid=new Map(D.l.map((f,i)=>[f.fid,i]));
   const aff=new Set();
   for(const r of st.tr){r.parts=r.parts0;r.bb=r.bb0;r.manual="";r.edited=false;r.calc=null;r.tedit=null}
@@ -787,8 +790,8 @@ function prefillFor(r){const tipo=r.cuadro==="5.4"?"Línea particularizada.":r.c
 function edTabUI(){const L1=Object.entries(st.edT),L2=Object.entries(st.edL);const n=L1.length+L2.length;$("#nEd").textContent=n||"";
   const pend=k=>(k in st.pendT||k in st.pendL)?' <span class="chip k-warn">sin publicar</span>':"";
   const rowsT=L1.map(([id,rec])=>`<div class="row" data-k="t" data-id="${id}"><span class="id">${id}</span><span class="t">${esc((st.trById[id]||{}).calle||"")}</span><span class="cu">tramo</span><span class="s">${[rec.g?"trazado editado":"",rec.estado_manual?"estado: "+esc(rec.estado_manual):""].filter(Boolean).join(" · ")} · ${esc(rec.por||"")} ${fmtD(rec.fecha)}${pend(id)}</span><span class="chips"><button class="btn sm" type="button" data-undo="t" data-id="${id}">Deshacer</button></span></div>`).join("");
-  const rowsL=L2.map(([k,rec])=>{const f=D.l[D.lByFid.get(k[0]==="f"?+k.slice(1):k)];const what=[rec.nueva?"línea nueva":"",rec.baja?"dada de baja":"",rec.g&&!rec.nueva?"geometría":"",rec.a&&!rec.nueva?"atributos":""].filter(Boolean).join(" · ");
-    return `<div class="row" data-k="l" data-id="${esc(k)}"><span class="id">${k[0]==="f"?"FID "+k.slice(1):"nueva"}</span><span class="t">${esc(f?(f.A.TIPO||"(sin tipo)"):"(no disponible)")}</span><span class="cu">lineas07</span><span class="s">${what} · ${esc(rec.por||"")} ${fmtD(rec.fecha)}${pend(k)}</span><span class="chips"><button class="btn sm" type="button" data-undo="l" data-id="${esc(k)}">Deshacer</button></span></div>`}).join("");
+  const rowsL=L2.map(([k,rec])=>{const f=D.l[D.lByFid.get(k[0]==="f"?+k.slice(1):k)];const what=rec.nueva&&rec.baja?"línea nueva dada de baja (no se muestra ni se descarga)":[rec.nueva?"línea nueva":"",rec.baja?"dada de baja":"",rec.g&&!rec.nueva?"geometría":"",rec.a&&!rec.nueva?"atributos":""].filter(Boolean).join(" · ");
+    return `<div class="row" data-k="l" data-id="${esc(k)}"><span class="id">${k[0]==="f"?"FID "+k.slice(1):"nueva"}</span><span class="t">${esc(f?(f.A.TIPO||"(sin tipo)"):"(no disponible)")}</span><span class="cu">lineas07</span><span class="s">${what} · ${esc(rec.por||"")} ${fmtD(rec.fecha)}${pend(k)}</span><span class="chips"><button class="btn sm" type="button" data-undo="l" data-id="${esc(k)}" ${rec.nueva?'title="Borra la línea nueva por completo"':""}>${rec.nueva?"Eliminar":"Deshacer"}</button></span></div>`}).join("");
   $("#listEd").innerHTML=n?rowsT+rowsL:'<div class="empty">Todavía no hay ediciones. Elegí un tramo para editar su trazado o su estado, o hacé clic en una línea de lineas07 para editar sus atributos.</div>'}
 $("#listEd").addEventListener("click",e=>{const u=e.target.closest("[data-undo]");if(u){e.stopPropagation();undoEdit(u.dataset.undo,u.dataset.id);return}
   const r=e.target.closest(".row");if(!r)return;if(r.dataset.k==="t"){showTab("tr");select("tr",r.dataset.id,true)}else{const k=r.dataset.id;const i=D.lByFid.get(k[0]==="f"?+k.slice(1):k);if(i!==undefined){const f=D.l[i];fitBB(f.bb,40);const c=f.parts[0];st.mark=null;inspect({k:"l",i},c[0],c[1])}}});

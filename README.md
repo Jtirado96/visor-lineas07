@@ -89,7 +89,8 @@ Todas las ediciones se guardan en `data/revision.json` junto con las revisiones 
 **Editar lineas07.** Clic sobre una línea del mapa:
 - **Editar atributos**: SMP, sección, manzana, parcela, TIPO, NRO_ORD, OBS, PLANO, TEXTO, etc. «← desde SMP» completa sección, manzana y parcela.
 - **Editar geometría**: igual que los tramos.
-- **Dar de baja / Reincorporar**: la línea queda punteada y deja de contar en el cruce.
+- **Dar de baja / Reincorporar**: la línea queda punteada y deja de contar en el cruce Es para líneas que ya existen en lineas07: quedan marcadas para darlas de baja en el shapefile.
+- **Eliminar línea** (solo en líneas nuevas): la borra por completo, sin dejar rastro en el mapa ni en las descargas. Pide confirmar con un segundo clic.
 - **Línea nueva**: desde la ficha de un tramo («Agregar línea en lineas07», con los atributos precargados) o desde la pestaña Ediciones.
 
 **Descargar con los cambios** (pestaña Ediciones), en CABA-PG07:
