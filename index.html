@@ -113,6 +113,26 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .seg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink)}
 .empty{padding:24px 16px;color:var(--muted);font-size:13px}
 .ro{font-size:12px;padding:6px 12px;background:var(--warn-soft);color:var(--warn);border-bottom:1px solid var(--line)}
+/* editing */
+.vx{background:var(--panel);border:2px solid var(--sel);border-radius:50%;box-sizing:border-box;cursor:move}
+.vx.on{background:var(--sel)}
+.vm{background:var(--sel);opacity:.45;border-radius:50%;cursor:copy}
+.vm:hover{opacity:.9}
+.edbar{position:absolute;z-index:1150;top:10px;left:10px;right:60px;max-width:620px;background:var(--panel);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);padding:8px 10px;display:grid;gap:6px}
+.edbar .tools{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.edbar button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.sm{padding:3px 8px;font-size:12px}
+.editbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;display:grid;gap:8px}
+.editbox h4,.layers h4.x{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+.editbox label,.attr label{font-size:12px;color:var(--muted);display:grid;gap:3px}
+.editbox select,.attr input,.attr textarea{padding:5px 6px;border:1px solid var(--line);border-radius:5px;background:var(--soft);width:100%;min-width:0}
+.attr{display:grid;gap:6px;margin-top:6px}
+.attr textarea{min-height:52px;resize:vertical}
+.attr .row2{display:grid;grid-template-columns:1fr 1fr;gap:6px;align-items:end}
+.attr .row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+.act{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.lbtns{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip.k-man{background:var(--info-soft);color:var(--info)}
 /* Leaflet look */
 .leaflet-container{font:12px var(--f-ui);background:var(--bg)}
 .leaflet-bar{border:1px solid var(--line)!important;border-radius:6px;background:var(--panel);overflow:hidden;box-shadow:none!important}
@@ -151,6 +171,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
       <div class="tabs" role="tablist">
         <button role="tab" id="tab-tr" aria-selected="true" data-tab="tr">Tramos CUR <span id="nTr" class="mono"></span></button>
         <button role="tab" id="tab-sr" aria-selected="false" data-tab="sr">Sin respaldo <span id="nSr" class="mono"></span></button>
+        <button role="tab" id="tab-ed" aria-selected="false" data-tab="ed">Ediciones <span id="nEd" class="mono"></span></button>
         <button role="tab" id="tab-ly" aria-selected="false" data-tab="ly">Capas</button>
       </div>
       <div id="roNote" class="ro" hidden></div>
@@ -172,6 +193,15 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
         </div>
         <div class="list" id="listSr"></div>
         <div class="detail" id="detSr" hidden></div>
+      </div>
+      <div class="tabpane" id="pane-ed" hidden>
+        <div class="filters" style="display:grid;gap:8px">
+          <div class="act"><button class="btn" type="button" id="newLineBtn" title="Dibujar una línea nueva en lineas07">+ Nueva línea en lineas07</button></div>
+          <div class="act"><button class="btn" type="button" id="exDxf">lineas07 (.dxf)</button><button class="btn" type="button" id="exShp">lineas07 (Shapefile .zip)</button><button class="btn" type="button" id="exTr">Tramos CUR (.dxf)</button></div>
+          <label class="note" style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="exBaja"> Incluir en el DXF las líneas dadas de baja (capa L07_BAJA)</label>
+          <p class="note" style="margin:0">Las descargas salen en CABA-PG07 con todas las ediciones. En el DXF los atributos van como datos extendidos (XDATA, aplicación LINEAS07) de cada polilínea; para llevar la tabla de atributos a AutoCAD Map usá el Shapefile.</p>
+        </div>
+        <div class="list" id="listEd"></div>
       </div>
       <div class="tabpane" id="pane-ly" hidden>
         <div class="layers">
@@ -211,6 +241,9 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
       <canvas id="cv"></canvas>
       <div class="loading" id="loading">Cargando capas…</div>
       <div class="inspector" id="insp" hidden></div>
+      <div class="edbar" id="edBar" hidden><div style="display:flex;justify-content:space-between;gap:8px"><b id="edTitle"></b><span class="note" id="edHint"></span></div>
+        <div class="tools"><button class="btn sm" type="button" data-mode="edit">Mover vértices</button><button class="btn sm" type="button" data-mode="append">Extender</button><button class="btn sm" type="button" data-mode="draw">Dibujar tramo nuevo</button><button class="btn sm" type="button" id="edDel">Borrar vértice</button>
+        <label class="note" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="edSnap" checked> Imán</label><span style="flex:1"></span><button class="btn sm primary" type="button" id="edSave">Guardar</button><button class="btn sm" type="button" id="edCancel">Cancelar</button></div></div>
       <div class="coords" id="coords">X — · Y —</div>
     </section>
   </main>
@@ -227,6 +260,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 </form></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.9.0/proj4.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 "use strict";
 const PG07="+proj=tmerc +lat_0=-34.6292666666667 +lon_0=-58.4633083333333 +k=1 +x_0=20000 +y_0=70000 +ellps=WGS84 +units=m +no_defs";
@@ -331,17 +365,19 @@ function render(){
     ctx.setLineDash([4,3]);ctx.lineWidth=1.2;ctx.strokeStyle=C.rail;ctx.beginPath();for(const f of rl)for(const p of f.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;}
   // tramos (under lineas07)
   if(st.ly.tr){for(const r of st.tr){if(!r.parts.length||r.bb[2]<bb[0]||r.bb[0]>bb[2]||r.bb[3]<bb[1]||r.bb[1]>bb[3])continue;
-      const col=st.colorBy==="estado"?estColor(r.estado):revColor(revOf(r.id));
+      const col=st.colorBy==="estado"?estColor(est(r)):revColor(revOf(r.id));
       ctx.strokeStyle=col;ctx.globalAlpha=0.35;ctx.lineWidth=Math.max(5,Math.min(40,(r.halfw||15)*2*s));ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.globalAlpha=1;
       ctx.lineWidth=1.2;ctx.setLineDash([6,4]);ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);}}
   // lineas07
   {stamp++;const by={part:[],afec:[],aper:[],serv:[],rect:[],otro:[]};query(D.lG,D.l,bb,stamp,f=>{if(st.ly.l07[f.fam])by[f.fam].push(f)});
     const w=Math.max(1.3,Math.min(3,s*4));
-    for(const [k] of FAMS){const arr=by[k];if(!arr.length)continue;ctx.strokeStyle=C[k];ctx.lineWidth=w;ctx.beginPath();for(const f of arr)for(const p of f.parts)pathLine(p,t);ctx.stroke()}}
+    for(const [k] of FAMS){const arr=by[k];if(!arr.length)continue;ctx.strokeStyle=C[k];ctx.lineWidth=w;ctx.beginPath();for(const f of arr)if(!f.baja)for(const p of f.parts)pathLine(p,t);ctx.stroke();
+      ctx.setLineDash([3,4]);ctx.globalAlpha=0.6;ctx.beginPath();for(const f of arr)if(f.baja)for(const p of f.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1}}
   // highlight
   if(st.hl.size){ctx.lineWidth=Math.max(3.5,Math.min(6,s*8));ctx.strokeStyle=C.sel;ctx.beginPath();for(const i of st.hl){const f=D.l[i];if(f)for(const p of f.parts)pathLine(p,t)}ctx.stroke()}
   if(st.selKind==="tr"&&st.sel){const r=st.trById[st.sel];if(r&&r.parts.length){ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.setLineDash([10,5]);ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);
     const a=r.parts[0],z=r.parts[r.parts.length-1];for(const [x,y] of [[a[0],a[1]],[z[z.length-2],z[z.length-1]]]){ctx.beginPath();ctx.arc(t.cx+x*s,t.cy-y*s,4.5,0,7);ctx.fillStyle=C.sel;ctx.fill()}}}
+  if(ED.on){ctx.strokeStyle=C.accent;ctx.lineWidth=3.5;ctx.beginPath();for(const p of ED.parts){if(!p.length)continue;ctx.moveTo(t.cx+p[0][0]*s,t.cy-p[0][1]*s);for(let i=1;i<p.length;i++)ctx.lineTo(t.cx+p[i][0]*s,t.cy-p[i][1]*s)}ctx.stroke()}
   if(st.mark){ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,7,0,7);ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.stroke();ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,2,0,7);ctx.fillStyle=C.sel;ctx.fill()}
   labels(t,bb);
 }
@@ -362,7 +398,7 @@ function dParts(parts,x,y){let m=1e12;for(const p of parts)for(let i=2;i<p.lengt
 function inRing(r,x,y){let c=false;for(let i=0,j=r.length-2;i<r.length;j=i,i+=2){const xi=r[i],yi=r[i+1],xj=r[j],yj=r[j+1];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 const mapEl=$("#map");
 map.on("mousemove",e=>{const p=fromLL(e.latlng.lat,e.latlng.lng);if(p)$("#coords").textContent=`PG07  X ${p[0].toFixed(2)}  Y ${p[1].toFixed(2)}`});
-map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol=9/t.s;const bb=[x-tol,y-tol,x+tol,y+tol];
+map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol=9/t.s;if(ED.on){edMapClick(x,y);return}const bb=[x-tol,y-tol,x+tol,y+tol];
   let best=null,bd=tol;stamp++;
   query(D.lG,D.l,bb,stamp,(f,i)=>{if(!st.ly.l07[f.fam])return;const d=dParts(f.parts,x,y);if(d<bd){bd=d;best={k:"l",i}}});
   if(!best&&st.ly.tr){for(const r of st.tr){if(!r.parts.length)continue;const d=dParts(r.parts,x,y);const lim=Math.max(tol,(r.halfw||15));if(d<lim&&d<(best?.d??1e9))best={k:"tr",id:r.id,d}}}
@@ -372,21 +408,27 @@ map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol
 function linksFor(x,y){const ll=U(x,y),la=ll.lat.toFixed(6),lo=ll.lng.toFixed(6),pg=fromLL(ll.lat,ll.lng);
   return `<div class="mono" style="margin-top:6px">${pg?`X ${pg[0].toFixed(2)} · Y ${pg[1].toFixed(2)} (CABA-PG07)<br>`:""}${la}, ${lo} (WGS84)</div><div class="links"><a href="https://www.google.com/maps?q=${la},${lo}" target="_blank" rel="noopener">Google Maps</a><a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${la},${lo}" target="_blank" rel="noopener">Street View</a><a href="https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=18/${la}/${lo}" target="_blank" rel="noopener">OpenStreetMap</a></div>`}
 function inspect(h,x,y){const el=$("#insp");let html="";
-  if(h&&h.k==="l"){const f=D.l[h.i];const trs=st.fid2tr[f.fid]||[],srs=st.fid2sr[f.fid]||[];
-    html=`<h3><span>${esc(f.tipo||"(sin tipo)")}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(f.smp||"—")}</dd><dt>OBS</dt><dd>${esc(f.obs||"—")}</dd><dt>Plano</dt><dd>${esc(f.plano||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(f.nro||"—")}</dd><dt>TEXTO</dt><dd>${esc(f.texto||"—")}</dd><dt>FID lineas07</dt><dd class="mono">${f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd></dl>`;
+  if(h&&h.k==="l"){const f=D.l[h.i];const trs=st.fid2tr[f.fid]||[],srs=st.fid2sr[f.fid]||[];const A=f.A||{};
+    html=`<h3><span>${esc(f.tipo||"(sin tipo)")}${f.baja?' <span class="chip k-bad">dada de baja</span>':""}${f.nueva?' <span class="chip k-info">nueva</span>':""}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(A.SMP||"—")}</dd><dt>Sección · Mz · Parc.</dt><dd class="mono">${esc(A.SECCION||"—")} · ${esc(A.MANZANA||"—")} · ${esc(A.PARCELA||"—")}</dd><dt>OBS</dt><dd>${esc(A.OBS||"—")}</dd><dt>Plano</dt><dd>${esc(A.PLANO||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(A.NRO_ORD||"—")}</dd><dt>TEXTO</dt><dd>${esc(A.TEXTO||"—")}</dd><dt>FID lineas07</dt><dd class="mono">${f.nueva?"nueva":f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd>${f.edit?`<dt>Última edición</dt><dd>${esc(f.edit.por||"")} · ${fmtD(f.edit.fecha)}</dd>`:""}</dl>
+    <div class="lbtns"><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button><button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}">${f.baja?"Reincorporar":"Dar de baja"}</button></div>`;
     st.hl=new Set([h.i]);}
-  else if(h&&h.k==="tr"){const r=st.trById[h.id];select("tr",r.id,false);html=`<h3><span>${esc(r.id)} · ${esc(r.calle)}</span><button class="x" aria-label="Cerrar">×</button></h3><div>${esc(r.desde)} – ${esc(r.hasta)}</div><div style="margin-top:4px"><span class="chip ${estKind(r.estado)}">${esc(estShort(r.estado))}</span></div>`}
+  else if(h&&h.k==="tr"){const r=st.trById[h.id];select("tr",r.id,false);html=`<h3><span>${esc(r.id)} · ${esc(r.calle)}</span><button class="x" aria-label="Cerrar">×</button></h3><div>${esc(r.desde)} – ${esc(r.hasta)}</div><div style="margin-top:4px"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span></div>`}
   else if(h&&h.k==="e"){const f=D.ej[h.i];const a=f.alts;html=`<h3><span>${esc(f.name||"(sin nombre)")}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>Tipo</dt><dd>${esc(f.tipo)}${f.boca?" · bocacalle":""}</dd>${a?`<dt>Alturas</dt><dd class="mono">der. ${a[0]}–${a[1]} · izq. ${a[2]}–${a[3]}</dd>`:""}</dl>`;st.hl=new Set()}
   else if(h&&h.k==="m"){const f=D.mz[h.i];html=`<h3><span>Manzana <span class="mono">${esc(f.sm)}</span></span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>Sección · manzana</dt><dd class="mono">${esc(f.sm)}</dd><dt>Tipo</dt><dd>${esc(f.tipo||"—")}</dd><dt>Superficie</dt><dd>${f.sup?f.sup.toLocaleString("es-AR")+" m²":"—"}</dd></dl>`;st.hl=new Set()}
   else{html=`<h3><span>Punto</span><button class="x" aria-label="Cerrar">×</button></h3>`;st.hl=new Set()}
   el.innerHTML=html+linksFor(x,y);el.hidden=false;}
-$("#insp").addEventListener("click",e=>{const a=e.target.closest("[data-go]");if(a){e.preventDefault();showTab(a.dataset.go);select(a.dataset.go,a.dataset.id,true);return}
+$("#insp").addEventListener("click",e=>{const ac=e.target.closest("[data-act]");if(ac){const i=+ac.dataset.i,f=D.l[i];if(!f)return;const c=st.mark||[f.parts[0][0],f.parts[0][1]];
+    if(ac.dataset.act==="attr")attrForm(i,c[0],c[1],false);else if(ac.dataset.act==="geom"){$("#insp").hidden=true;startEdit("l",f.fid)}
+    else if(ac.dataset.act==="baja")saveEditL(lineKey(f),{baja:true},"Dada de baja");else if(ac.dataset.act==="alta")saveEditL(lineKey(f),{baja:false},"Reincorporada");
+    if(ac.dataset.act==="baja"||ac.dataset.act==="alta")setTimeout(()=>{const j=D.lByFid.get(f.fid);if(j!==undefined)inspect({k:"l",i:j},c[0],c[1])},30);return}
+  const a=e.target.closest("[data-go]");if(a){e.preventDefault();showTab(a.dataset.go);select(a.dataset.go,a.dataset.id,true);return}
   if(e.target.closest(".x")){$("#insp").hidden=true;st.mark=null;if(st.selKind!=="tr"&&st.selKind!=="sr")st.hl=new Set();draw()}});
 
 /* ---------- data load ---------- */
 async function load(){
   const get=n=>fetch("data/"+n).then(r=>{if(!r.ok)throw new Error(n);return r.json()});
-  const [ej,mz,ctxd,city,l07,cr]=await Promise.all(["ejes.json","manzanas.json","contexto.json","ciudad.json","lineas07.json","cruce.json"].map(get));
+  const [ej,mz,ctxd,city,l07,cr,lpg]=await Promise.all(["ejes.json","manzanas.json","contexto.json","ciudad.json","lineas07.json","cruce.json","lineas07_pg07.json"].map(get));
+  D.cols=lpg.cols;D.prj=lpg.prj;D.gpg={};const Apg={};for(const r of lpg.f){D.gpg[r.fid]=r.g;Apg[r.fid]=Object.fromEntries(lpg.cols.map((c,j)=>[c,r.a[j]]))}
   D.ej=ej.f.map(a=>{const parts=a[4].map(dec);const f={name:ej.names[a[0]],tipo:ej.tipos[a[1]],boca:a[2],alts:a[3]||null,parts,bb:bboxOf(parts)};f.av=/AVENIDA|AUTOPISTA|BOULEVAR/.test(f.tipo);f.rail=f.tipo==="FERROCARRIL";
     if(f.name&&!/SIN NOMBRE/.test(f.name)&&!f.rail){let best=null;for(const p of parts)for(let i=2;i<p.length;i+=2){const dx=p[i]-p[i-2],dy=p[i+1]-p[i-1],l=Math.hypot(dx,dy);if(!best||l>best.len)best={len:l,x:(p[i]+p[i-2])/2,y:(p[i+1]+p[i-1])/2,ang:Math.atan2(dy,dx)}}f.lp=best;f.label=f.name.replace(/^AV\. /,"Av. ").replace(/\b([A-ZÑÁÉÍÓÚ])([A-ZÑÁÉÍÓÚ]+)/g,(m,a,b)=>a+b.toLowerCase())}
     f.nn=norm(f.name);return f});
@@ -395,12 +437,12 @@ async function load(){
   D.ctx=ctxd.f.map(a=>{const polys=a[2].map(p=>p.map(dec));return{name:a[0],lp:a[1],polys,bb:bboxOf(polys.flat())}});
   D.city=city.g.map(p=>p.map(dec));D.cityBB=bboxOf(D.city.flat());
   D.l=l07.f.map(a=>{const parts=a[7].map(dec);const tipo=l07.tipos[a[1]];return{fid:a[0],tipo,fam:famOf(tipo),smp:a[2],obs:a[3],plano:a[4],nro:a[5],texto:l07.textos[a[6]],parts,bb:bboxOf(parts)}});D.lG=grid(D.l);
-  D.lByFid=new Map(D.l.map((f,i)=>[f.fid,i]));
-  st.tr=cr.tramos.map(r=>{const parts=r.g.map(dec);r.parts=parts;r.bb=parts.length?bboxOf(parts):null;r.halfw=1.2155*(r.dist?r.dist+4:r.ancho?r.ancho/2+4:14);return r});
+  D.l.forEach(f=>{f.A0=Apg[f.fid]||{};f.A=Object.assign({},f.A0);f.parts0=f.parts;f.bb0=f.bb});D.lByFid=new Map(D.l.map((f,i)=>[f.fid,i]));D.lByFid0=new Map(D.lByFid);
+  st.tr=cr.tramos.map(r=>{const parts=r.g.map(dec);r.parts=parts;r.bb=parts.length?bboxOf(parts):null;r.parts0=parts;r.bb0=r.bb;r.manual="";r.calc=null;r.halfw=1.2155*(r.dist?r.dist+4:r.ancho?r.ancho/2+4:14);return r});
   st.sr=cr.sinrespaldo.map(r=>{const parts=r.fids.map(f=>D.l[D.lByFid.get(f)]).filter(Boolean).flatMap(f=>f.parts);r.bb=parts.length?bboxOf(parts):null;return r});
   st.tr.forEach(r=>{st.trById[r.id]=r;r.fids.forEach(f=>(st.fid2tr[f]||(st.fid2tr[f]=[])).push(r.id))});
   st.sr.forEach(r=>{st.srById[r.id]=r;r.fids.forEach(f=>(st.fid2sr[f]||(st.fid2sr[f]=[])).push(r.id))});
-  D.ready=true;$("#loading").hidden=true;size();fitCity();buildLegends();buildFilters();renderLists();reload(true);
+  D.ready=true;$("#loading").hidden=true;size();fitCity();buildLegends();buildFilters();applyEdits();renderLists();reload(true);
   const h=decodeURIComponent(location.hash.slice(1));if(st.trById[h]){select("tr",h,true)}else if(st.srById[h]){showTab("sr");select("sr",h,true)}
   draw();
 }
@@ -419,9 +461,9 @@ $("#colEst").onclick=()=>{st.colorBy="estado";$("#colEst").setAttribute("aria-pr
 $("#colRev").onclick=()=>{st.colorBy="rev";$("#colRev").setAttribute("aria-pressed","true");$("#colEst").setAttribute("aria-pressed","false");legendTr();draw()};
 
 /* ---------- tabs, filters, lists ---------- */
-function showTab(k){for(const b of document.querySelectorAll(".tabs button"))b.setAttribute("aria-selected",String(b.dataset.tab===k));for(const p of ["tr","sr","ly"])$("#pane-"+p).hidden=p!==k}
+function showTab(k){for(const b of document.querySelectorAll(".tabs button"))b.setAttribute("aria-selected",String(b.dataset.tab===k));for(const p of ["tr","sr","ed","ly"])$("#pane-"+p).hidden=p!==k}
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-function buildFilters(){const ests=[...new Set(st.tr.map(r=>estShort(r.estado)))];$("#fEstado").innerHTML='<option value="">Todo estado</option>'+ests.map(e=>`<option>${esc(e)}</option>`).join("");
+function buildFilters(){const ests=[...new Set([...st.tr.map(r=>estShort(r.estado)),...ESTADOS.map(estShort)])];$("#fEstado").innerHTML='<option value="">Todo estado</option>'+ests.map(e=>`<option>${esc(e)}</option>`).join("");
   $("#fRev").innerHTML='<option value="">Toda revisión</option>'+REV_TR.map(v=>`<option>${esc(v)}</option>`).join("");
   $("#fRevSr").innerHTML='<option value="">Toda revisión</option>'+REV_SR.map(v=>`<option>${esc(v)}</option>`).join("");
   ["#fCuadro","#fEstado","#fRev","#fTxt","#fFam","#fRevSr","#fTxtSr"].forEach(s=>$(s).addEventListener("input",renderLists));
@@ -429,8 +471,8 @@ function buildFilters(){const ests=[...new Set(st.tr.map(r=>estShort(r.estado)))
 const revOf=id=>st.rev[id]?.resultado||(id.startsWith("SR")?REV_SR[0]:REV_TR[0]);
 function renderLists(){
   const fc=$("#fCuadro").value,fe=$("#fEstado").value,fr=$("#fRev").value,ft=norm($("#fTxt").value);
-  const rows=st.tr.filter(r=>(!fc||r.cuadro===fc)&&(!fe||estShort(r.estado)===fe)&&(!fr||revOf(r.id)===fr)&&(!ft||norm(r.id+" "+r.calle+" "+r.desde+" "+r.hasta).includes(ft)));
-  $("#listTr").innerHTML=rows.length?rows.map(r=>`<div class="row${st.selKind==="tr"&&st.sel===r.id?" sel":""}" data-id="${r.id}" tabindex="0" role="button"><span class="id">${r.id}</span><span class="t">${esc(r.calle)}</span><span class="cu">${r.cuadro}</span><span class="s">${esc(r.desde)} – ${esc(r.hasta)}</span><span class="chips"><span class="chip ${estKind(r.estado)}">${esc(estShort(r.estado))}</span><span class="chip ${revKind(revOf(r.id))}">${esc(revOf(r.id))}</span></span></div>`).join(""):'<div class="empty">Ningún tramo coincide con los filtros.</div>';
+  const rows=st.tr.filter(r=>(!fc||r.cuadro===fc)&&(!fe||estShort(est(r))===fe)&&(!fr||revOf(r.id)===fr)&&(!ft||norm(r.id+" "+r.calle+" "+r.desde+" "+r.hasta).includes(ft)));
+  $("#listTr").innerHTML=rows.length?rows.map(r=>`<div class="row${st.selKind==="tr"&&st.sel===r.id?" sel":""}" data-id="${r.id}" tabindex="0" role="button"><span class="id">${r.id}</span><span class="t">${esc(r.calle)}</span><span class="cu">${r.cuadro}</span><span class="s">${esc(r.desde)} – ${esc(r.hasta)}</span><span class="chips"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span>${r.manual?'<span class="chip k-man">manual</span>':""}${r.edited?'<span class="chip k-man">trazado editado</span>':""}<span class="chip ${revKind(revOf(r.id))}">${esc(revOf(r.id))}</span></span></div>`).join(""):'<div class="empty">Ningún tramo coincide con los filtros.</div>';
   const ff=$("#fFam").value,frs=$("#fRevSr").value,fts=norm($("#fTxtSr").value);
   const srs=st.sr.filter(r=>(!ff||r.familia===ff)&&(!frs||revOf(r.id)===frs)&&(!fts||norm(r.id+" "+r.calle+" "+r.smp+" "+r.texto+" "+r.tipo).includes(fts)));
   $("#listSr").innerHTML=srs.length?srs.map(r=>`<div class="row${st.selKind==="sr"&&st.sel===r.id?" sel":""}" data-id="${r.id}" tabindex="0" role="button"><span class="id">${r.id}</span><span class="t">${esc(srTitle(r))}</span><span class="cu">${r.n} lín.</span><span class="s">${esc(r.familia)}${r.desde?" · "+esc(r.desde)+" – "+esc(r.hasta):""}${r.calle?"":" · SMP "+esc(r.smp.slice(0,60))}</span><span class="chips"><span class="chip ${revKind(revOf(r.id))}">${esc(revOf(r.id))}</span>${r.en_cuadro?'<span class="chip k-info">Calle del cuadro, fuera del tramo</span>':""}</span></div>`).join(""):'<div class="empty">Ninguna línea coincide con los filtros.</div>';
@@ -440,7 +482,7 @@ for(const [lid,k] of [["#listTr","tr"],["#listSr","sr"]]){const el=$(lid);el.add
 function progress(){const n=st.tr.filter(r=>revOf(r.id)!=="Sin revisar").length;$("#progTxt").textContent=`Revisados ${n}/${st.tr.length}`;$("#progBar").style.width=(100*n/Math.max(1,st.tr.length))+"%"}
 
 function select(kind,id,zoom){st.sel=id;st.selKind=kind;const r=kind==="tr"?st.trById[id]:st.srById[id];if(!r)return;
-  st.hl=new Set(r.fids.map(f=>D.lByFid.get(f)).filter(i=>i!==undefined));
+  st.hl=hlFor(r);
   if(zoom&&r.bb)fitBB(r.bb);
   document.querySelectorAll(".list .row.sel").forEach(x=>x.classList.remove("sel"));const row=document.querySelector(`#list${kind==="tr"?"Tr":"Sr"} .row[data-id="${id}"]`);if(row){row.classList.add("sel");row.scrollIntoView({block:"nearest"})}
   renderDetail(kind);draw();}
@@ -449,12 +491,13 @@ const pct=v=>v==null?"—":Math.round(v*100)+"%";
 function covBar(label,v,col){return `<div class="cov"><span style="width:70px">${label}</span><span class="m"><i style="width:${v==null?0:Math.round(v*100)}%;background:${col}"></i></span><span class="mono" style="width:38px;text-align:right">${pct(v)}</span></div>`}
 function renderDetail(kind){const host=kind==="tr"?$("#detTr"):$("#detSr");const other=kind==="tr"?$("#detSr"):$("#detTr");other.hidden=true;const r=kind==="tr"?st.trById[st.sel]:st.srById[st.sel];if(!r){host.hidden=true;return}
   let h=`<div class="detail-in">`;
-  if(kind==="tr"){h+=`<h2>${esc(r.calle)}</h2><div class="sub"><span class="mono">${r.id}</span> · Cuadro ${r.cuadro} · ${esc(r.desde)} – ${esc(r.hasta)}</div><span class="chip ${estKind(r.estado)}">${esc(r.estado)}</span>
-    ${covBar("Lado izq.",r.cov_izq,"var(--c-part)")}${covBar("Lado der.",r.cov_der,"var(--c-part)")}
+  if(kind==="tr"){const c=cvOf(r),E=est(r);h+=`<h2>${esc(r.calle)}</h2><div class="sub"><span class="mono">${r.id}</span> · Cuadro ${r.cuadro} · ${esc(r.desde)} – ${esc(r.hasta)}</div><span class="chip ${estKind(E)}">${esc(E)}</span>${r.manual?` <span class="chip k-man">manual · calculado: ${esc(r.calc?r.calc.estado:r.estado)}</span>`:""}${r.calc?' <span class="chip k-man">recalculado en el visor</span>':""}
+    ${covBar("Lado izq.",c.cov_izq,"var(--c-part)")}${covBar("Lado der.",c.cov_der,"var(--c-part)")}
     <dl class="kv">${r.dist!=null?`<dt>Dist. al eje / ancho</dt><dd>${r.dist} m / ${r.ancho} m</dd>`:r.ancho?`<dt>Ancho total</dt><dd>${r.ancho} m</dd>`:""}
-    <dt>Norma (cuadro)</dt><dd>${esc(r.norma)}</dd>${r.control?`<dt>Control de ancho</dt><dd>${esc(r.control)}</dd>`:""}
-    <dt>Líneas vinculadas</dt><dd>${r.fids.length} (resaltadas en el mapa)</dd>${r.tipos?`<dt>Tipos en la franja</dt><dd>${esc(r.tipos)}</dd>`:""}${r.obs?`<dt>OBS lineas07</dt><dd>${esc(r.obs)}</dd>`:""}
-    ${r.smp?`<dt>SMP</dt><dd class="mono">${esc(r.smp)}</dd>`:""}<dt>Eje usado</dt><dd>${esc(r.eje||"—")}</dd><dt>Armado del tramo</dt><dd>${esc(r.metodo||"—")}${r.largo?` · ${Math.round(r.largo).toLocaleString("es-AR")} m`:""}</dd>${r.nota?`<dt>Notas</dt><dd>${esc(r.nota)}</dd>`:""}</dl>`}
+    ${c.dist_izq!=null||c.dist_der!=null?`<dt>Dist. medida</dt><dd>izq. ${c.dist_izq??"—"} m · der. ${c.dist_der??"—"} m</dd>`:""}
+    <dt>Norma (cuadro)</dt><dd>${esc(r.norma)}</dd>${c.control?`<dt>Control de ancho</dt><dd>${esc(c.control)}</dd>`:""}
+    <dt>Líneas vinculadas</dt><dd>${(c.fids||[]).length} (resaltadas en el mapa)</dd>${c.tipos?`<dt>Tipos en la franja</dt><dd>${esc(c.tipos)}</dd>`:""}${c.obs?`<dt>OBS lineas07</dt><dd>${esc(c.obs)}</dd>`:""}
+    ${c.smp?`<dt>SMP</dt><dd class="mono">${esc(c.smp)}</dd>`:""}<dt>Eje usado</dt><dd>${esc(r.eje||"—")}</dd><dt>Armado del tramo</dt><dd>${r.edited?"Editado a mano":esc(r.metodo||"—")}${(r.calc&&r.calc.largo)||r.largo?` · ${Math.round((r.calc&&r.calc.largo)||r.largo).toLocaleString("es-AR")} m`:""}</dd>${r.nota&&!r.edited?`<dt>Notas</dt><dd>${esc(r.nota)}</dd>`:""}</dl>${tramoEditBox(r)}`}
   else{h+=`<h2>${esc(srTitle(r))}</h2><div class="sub"><span class="mono">${r.id}</span> · ${esc(r.familia)} · ${r.n} líneas · ${Math.round(r.largo).toLocaleString("es-AR")} m</div>
     <dl class="kv"><dt>TIPO</dt><dd>${esc(r.tipo)}</dd>${r.desde?`<dt>Tramo (TEXTO)</dt><dd>${esc(r.desde)} – ${esc(r.hasta)}</dd>`:""}<dt>¿Calle en el cuadro?</dt><dd>${r.en_cuadro?"Sí, pero la línea cae fuera del tramo calculado":"No"}</dd>${r.nro?`<dt>NRO_ORD</dt><dd>${esc(r.nro)}</dd>`:""}<dt>OBS</dt><dd>${esc(r.obs)}</dd><dt>SMP</dt><dd class="mono">${esc(r.smp||"—")}</dd><dt>TEXTO</dt><dd>${esc(r.texto||"—")}</dd></dl>`}
   const opts=kind==="tr"?REV_TR:REV_SR;const cur=st.rev[r.id]||{};const pend=!!st.pending[r.id];
@@ -467,7 +510,7 @@ function renderDetail(kind){const host=kind==="tr"?$("#detTr"):$("#detSr");const
     <ul class="hist" id="histList"></ul></div></div>`;
   host.innerHTML=h;host.hidden=false;host.scrollTop=0;
   host.dataset.id=r.id;host.dataset.dirty="";const mk=()=>{host.dataset.dirty="1"};["#revSel","#revObs","#revNorma","#revLink"].forEach(q=>$(q).addEventListener("input",mk));
-  $("#revSave").onclick=()=>saveRev(kind,r.id);fillHist(r.id);}
+  $("#revSave").onclick=()=>saveRev(kind,r.id);fillHist(r.id);if(kind==="tr")wireTramoEdit(r);}
 function fillHist(id){const ul=$("#histList");if(!ul)return;const items=((st.rev[id]&&st.rev[id].hist)||[]).slice(0,10);
   ul.innerHTML=items.map(h=>`<li><b>${esc(h.resultado)}</b> · ${h.fecha?new Date(h.fecha).toLocaleString("es-AR"):""} · ${esc(h.por||"—")}${h.norma?`<br>${esc(h.norma)}`:""}${h.obs?`<br>${esc(h.obs)}`:""}</li>`).join("")}
 let resumeSave=null;
@@ -516,24 +559,28 @@ async function fetchRemote(){
     if(r.status===401||r.status===403)throw new Error("GitHub rechazó el token: revisalo en ⚙.");
     throw new Error("GitHub respondió "+r.status)}
   const r=await fetch("data/revision.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("No se pudo leer data/revision.json");return{data:await r.json(),sha:null}}
-function applyRemote(data){st.remote=(data&&data.items)||{};st.rev=Object.assign({},st.remote,st.pending);refreshAfterRev()}
+function applyRemote(data){st.remote=(data&&data.items)||{};st.remL=(data&&data.lineas)||{};st.remT=(data&&data.tramos)||{};st.rev=Object.assign({},st.remote,st.pending);applyEdits();refreshAfterRev()}
 function refreshAfterRev(){pendUI();if(!D.ready)return;renderLists();if(st.sel){const host=st.selKind==="tr"?$("#detTr"):$("#detSr");if(!(host.dataset.dirty&&host.dataset.id===st.sel))renderDetail(st.selKind)}draw()}
-function pendUI(){const n=Object.keys(st.pending).length;$("#pendN").textContent=n;$("#pendN").hidden=!n;const ro=$("#roNote");
-  if(!(cfg.token&&cfg.owner&&cfg.repo)){ro.hidden=false;ro.textContent=n?`Tenés ${n} revisión(es) guardadas solo en este navegador. Configurá el token en ⚙ para publicarlas, o descargá revision.json desde ⚙ y subilo al repositorio.`:"Podés ver todo. Para publicar revisiones en el repositorio, configurá tu nombre y tu token de GitHub en ⚙."}
-  else{ro.hidden=!n;ro.textContent=n?`${n} revisión(es) sin publicar: tocá «Guardar en GitHub».`:""}}
-async function reload(quiet){try{const {data}=await fetchRemote();applyRemote(data);if(!quiet)say("Revisiones actualizadas")}catch(e){applyRemote({items:st.remote});say(e.message)}}
+function pendUI(){const n=Object.keys(st.pending).length+Object.keys(st.pendL||{}).length+Object.keys(st.pendT||{}).length;$("#pendN").textContent=n;$("#pendN").hidden=!n;const ro=$("#roNote");
+  if(!(cfg.token&&cfg.owner&&cfg.repo)){ro.hidden=false;ro.textContent=n?`Tenés ${n} cambio(s) guardados solo en este navegador. Configurá el token en ⚙ para publicarlas, o descargá revision.json desde ⚙ y subilo al repositorio.`:"Podés ver todo. Para publicar revisiones en el repositorio, configurá tu nombre y tu token de GitHub en ⚙."}
+  else{ro.hidden=!n;ro.textContent=n?`${n} cambio(s) sin publicar: tocá «Guardar en GitHub».`:""}}
+async function reload(quiet){try{const {data}=await fetchRemote();applyRemote(data);if(!quiet)say("Revisiones y ediciones actualizadas")}catch(e){applyRemote({items:st.remote,lineas:st.remL,tramos:st.remT});say(e.message)}}
 let publishing=false;
-async function publish(){if(publishing)return;const ids=Object.keys(st.pending);if(!ids.length){say("No hay revisiones pendientes de publicar");return}
+async function publish(){if(publishing)return;const ids=Object.keys(st.pending),kL=Object.keys(st.pendL),kT=Object.keys(st.pendT);if(!ids.length&&!kL.length&&!kT.length){say("No hay cambios pendientes de publicar");return}
   if(!cfg.owner||!cfg.repo||!cfg.token){openCfg("Completá el repositorio y el token para publicar.");return}
   publishing=true;$("#syncBtn").disabled=true;say("Publicando en GitHub…");let msgOut="";
   try{for(let attempt=0;attempt<3;attempt++){const {data,sha}=await fetchRemote();const items=Object.assign({},(data&&data.items)||{});
       for(const id of ids){const loc=Object.assign({},st.pending[id]),rem=items[id];loc.hist=(loc.hist||[]).slice();
         if(rem&&rem.fecha&&rem.fecha!==loc.fecha&&!loc.hist.some(h=>h.fecha===rem.fecha))loc.hist=[{resultado:rem.resultado,obs:rem.obs||"",norma:rem.norma||"",link:rem.link||"",por:rem.por||"",fecha:rem.fecha},...loc.hist].slice(0,30);
         items[id]=loc}
-      const body={actualizado:new Date().toISOString(),items};
-      const msg=ids.length===1?`Revisión ${ids[0]}: ${st.pending[ids[0]].resultado} (${cfg.nombre||"sin nombre"})`:`Revisión de ${ids.length} elementos (${cfg.nombre||"sin nombre"})`;
+      const lineas=Object.assign({},(data&&data.lineas)||{}),tramos=Object.assign({},(data&&data.tramos)||{});
+      for(const k of kL){if(st.pendL[k]===null)delete lineas[k];else lineas[k]=st.pendL[k]}
+      for(const k of kT){if(st.pendT[k]===null)delete tramos[k];else tramos[k]=st.pendT[k]}
+      const body={actualizado:new Date().toISOString(),items,lineas,tramos};
+      const parts=[...ids.map(i=>`Revisión ${i}: ${st.pending[i].resultado}`),...kT.map(k=>st.pendT[k]===null?`Deshacer edición ${k}`:`${k}: ${(st.pendT[k].hist&&st.pendT[k].hist[0]&&st.pendT[k].hist[0].accion)||"edición"}`),...kL.map(k=>st.pendL[k]===null?`Deshacer edición lineas07 ${k}`:`lineas07 ${k[0]==="f"?"FID "+k.slice(1):"nueva"}: ${(st.pendL[k].hist&&st.pendL[k].hist[0]&&st.pendL[k].hist[0].accion)||"edición"}`)];
+      const msg=(parts.length<=2?parts.join("; "):`${parts.length} cambios: ${parts.slice(0,2).join("; ")}…`)+` (${cfg.nombre||"sin nombre"})`;
       const r=await api("contents/data/revision.json",{method:"PUT",body:JSON.stringify(Object.assign({message:msg,content:b64e(JSON.stringify(body,null,1)),branch:cfg.branch||"main"},sha?{sha}:{}))});
-      if(r.ok){st.pending={};LS.set("l07pending",{});applyRemote(body);msgOut="Publicado en GitHub. El sitio lo muestra a los demás en uno o dos minutos.";return}
+      if(r.ok){st.pending={};st.pendL={};st.pendT={};LS.set("l07pending",{});LS.set("l07pendL",{});LS.set("l07pendT",{});applyRemote(body);msgOut="Publicado en GitHub. El sitio lo muestra a los demás en uno o dos minutos.";return}
       if((r.status===409||r.status===422)&&attempt<2)continue;
       if(r.status===401||r.status===403)throw new Error("GitHub rechazó el token: tiene que tener permiso «Contents: Read and write» sobre este repositorio.");
       if(r.status===404)throw new Error("No encontré el repositorio o la rama: revisá la configuración en ⚙.");
@@ -546,23 +593,264 @@ function readCfgForm(){cfg.nombre=$("#cfgName").value.trim();cfg.owner=$("#cfgOw
 $("#cfgBtn").onclick=()=>openCfg();$("#cfgClose").onclick=()=>{$("#cfgDlg").hidden=true};
 $("#cfgDlg").addEventListener("keydown",e=>{if(e.key==="Escape")$("#cfgDlg").hidden=true});
 $("#cfgForm").addEventListener("submit",e=>{e.preventDefault();readCfgForm();$("#cfgMsg").textContent="Configuración guardada en este navegador.";pendUI();
-  if(resumeSave&&cfg.nombre){const r=resumeSave;resumeSave=null;$("#cfgDlg").hidden=true;saveRev(r.kind,r.id,r.vals)}else reload(true)});
+  if(resumeSave&&cfg.nombre){const r=resumeSave;resumeSave=null;$("#cfgDlg").hidden=true;saveRev(r.kind,r.id,r.vals)}else if(resumeEdit&&cfg.nombre){const f=resumeEdit;resumeEdit=null;$("#cfgDlg").hidden=true;f()}else reload(true)});
 $("#cfgTest").onclick=async()=>{readCfgForm();const m=$("#cfgMsg");if(!cfg.owner||!cfg.repo){m.textContent="Completá usuario y repositorio.";return}m.textContent="Probando…";
   try{const r=await api("");if(!r.ok){m.textContent=r.status===404?"No encontré el repositorio (o el token no tiene acceso a él).":r.status===401?"El token no es válido.":"GitHub respondió "+r.status;return}
     const j=await r.json();m.textContent=j.permissions&&j.permissions.push?`Conexión correcta con ${j.full_name}: podés publicar revisiones.`:cfg.token?`Veo ${j.full_name}, pero el token no tiene permiso de escritura.`:`Veo ${j.full_name}. Sin token solo podés leer.`}
   catch(e){m.textContent="No se pudo conectar con GitHub."}};
-$("#cfgDl").onclick=()=>downloadFile("revision.json",JSON.stringify({actualizado:new Date().toISOString(),items:st.rev},null,1),"application/json");
+$("#cfgDl").onclick=()=>downloadFile("revision.json",JSON.stringify({actualizado:new Date().toISOString(),items:st.rev,lineas:st.edL,tramos:st.edT},null,1),"application/json");
 $("#syncBtn").onclick=publish;$("#reloadBtn").onclick=()=>reload(false);
 function downloadFile(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
 
 /* ---------- export ---------- */
 function exportCsv(){const sep=";";const q=v=>{v=v==null?"":String(v);return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};const f=d=>d?new Date(d).toLocaleString("es-AR"):"";
   const L1=[["ID","Cuadro","Calle","Desde","Hasta","Estado del cruce","Cobertura izq","Cobertura der","Revisión","Norma / fundamento","Enlace","Observaciones","Revisado por","Fecha revisión"].join(sep)];
-  for(const r of st.tr){const v=st.rev[r.id]||{};L1.push([r.id,r.cuadro,r.calle,r.desde,r.hasta,r.estado,pct(r.cov_izq),pct(r.cov_der),revOf(r.id),v.norma,v.link,v.obs,v.por,f(v.fecha)].map(q).join(sep))}
+  for(const r of st.tr){const v=st.rev[r.id]||{};L1.push([r.id,r.cuadro,r.calle,r.desde,r.hasta,est(r)+(r.manual?" (manual)":""),pct(cvOf(r).cov_izq),pct(cvOf(r).cov_der),revOf(r.id),v.norma,v.link,v.obs,v.por,f(v.fecha)].map(q).join(sep))}
   L1.push("");L1.push(["ID","Tipo","TIPO","Calle (TEXTO)","Desde","Hasta","Líneas","Largo m","SMP","Revisión","Norma / fundamento","Enlace","Observaciones","Revisado por","Fecha revisión"].join(sep));
   for(const r of st.sr){const v=st.rev[r.id]||{};L1.push([r.id,r.familia,r.tipo,r.calle,r.desde,r.hasta,r.n,String(r.largo).replace(".",","),r.smp,revOf(r.id),v.norma,v.link,v.obs,v.por,f(v.fecha)].map(q).join(sep))}
   downloadFile("seguimiento_cruce_CUR_lineas07.csv","﻿"+L1.join("\r\n"),"text/csv;charset=utf-8")}
 $("#exportBtn").onclick=exportCsv;
+
+/* ================= EDICIÓN: tramos del CUR y lineas07 ================= */
+const pg2m=(x,y)=>{const ll=toLL(x,y);const P=Pm(L.latLng(ll[0],ll[1]));return [P.x,P.y]};
+const m2pg=(X,Y)=>{const ll=U(X,Y);const p=fromLL(ll.lat,ll.lng);return [Math.round(p[0]*1000)/1000,Math.round(p[1]*1000)/1000]};
+const partsFromPG=g=>g.filter(p=>p&&p.length>1).map(p=>{const a=new Float64Array(p.length*2);p.forEach(([x,y],i)=>{const m=pg2m(x,y);a[2*i]=m[0];a[2*i+1]=m[1]});return a});
+const partsToPG=parts=>parts.map(p=>{const o=[];for(let i=0;i<p.length;i+=2)o.push(m2pg(p[i],p[i+1]));return o});
+const nowISO=()=>new Date().toISOString();
+const fmtD=d=>d?new Date(d).toLocaleString("es-AR"):"";
+const ESTADOS=["Completa","Completa en un solo lado","Cargada (verificar extensión)","Parcial","No está en lineas07","Cargada con otro tipo","Sin tramo (revisión manual)"];
+const EXPF={"5.4":"part","5.5 a1":"afec","5.5 a2":"afec","5.5 b":"aper"};
+const FAMNAME={part:"PART",afec:"AFEC",aper:"APER",serv:"SERV",rect:"RECT",otro:"OTRO"};
+st.pendL=LS.get("l07pendL",{});st.pendT=LS.get("l07pendT",{});st.remL={};st.remT={};st.edL={};st.edT={};
+
+/* ---------- geometry utils ---------- */
+function segX(ax,ay,bx,by,cx,cy,dx,dy){const r1=bx-ax,r2=by-ay,s1=dx-cx,s2=dy-cy,den=r1*s2-r2*s1;if(Math.abs(den)<1e-12)return null;const t=((cx-ax)*s2-(cy-ay)*s1)/den,u=((cx-ax)*r2-(cy-ay)*r1)/den;return(t>=0&&t<=1&&u>=0&&u<=1)?t:null}
+function unionLen(iv,lo,hi){const a=iv.map(([x,y])=>[Math.max(x,lo),Math.min(y,hi)]).filter(([x,y])=>y>x).sort((p,q)=>p[0]-q[0]);let t=0,c=null;for(const [x,y] of a){if(!c)c=[x,y];else if(x<=c[1])c[1]=Math.max(c[1],y);else{t+=c[1]-c[0];c=[x,y]}}if(c)t+=c[1]-c[0];return t}
+function wmed(arr){if(!arr.length)return null;arr.sort((a,b)=>a[0]-b[0]);const tot=arr.reduce((t,x)=>t+x[1],0);let acc=0;for(const [d,w] of arr){acc+=w;if(acc>=tot/2)return Math.round(d*100)/100}return Math.round(arr[arr.length-1][0]*100)/100}
+const Wreal=r=>r.cuadro==="5.4"?(r.dist||13)+12:r.cuadro==="5.5 a1"?(r.ancho||20)/2+12:35;
+function kScale(bb){const ll=U((bb[0]+bb[2])/2,(bb[1]+bb[3])/2);return Math.cos(ll.lat*Math.PI/180)}
+const est=r=>r.manual||(r.calc?r.calc.estado:r.estado);
+const cvOf=r=>r.calc||r;
+
+/* ---------- cruce recalculado en el visor (misma regla que el cruce original) ---------- */
+function recompute(r){
+  const out={calc:true,cov_izq:0,cov_der:0,dist_izq:null,dist_der:null,control:"",fids:[],estado:"No está en lineas07",tipos:"",obs:"",smp:"",largo:null};
+  if(!r.parts||!r.parts.length){out.estado="Sin tramo (revisión manual)";return out}
+  const K=kScale(r.bb),W=Wreal(r)/K,ex=12/K;
+  const S=[];let acc=0;for(const p of r.parts)for(let i=2;i<p.length;i+=2){const ax=p[i-2],ay=p[i-1],bx=p[i],by=p[i+1],l=Math.hypot(bx-ax,by-ay);if(l<1e-9)continue;S.push({ax,ay,bx,by,l,s0:acc});acc+=l}
+  const Lt=acc;if(Lt<=0)return out;out.largo=Math.round(Lt*K*10)/10;
+  const proj=(x,y)=>{let b=null;for(const g of S){const dx=g.bx-g.ax,dy=g.by-g.ay;let u=((x-g.ax)*dx+(y-g.ay)*dy)/(g.l*g.l);u=u<0?0:u>1?1:u;const px=g.ax+u*dx,py=g.ay+u*dy,d=Math.hypot(x-px,y-py);if(!b||d<b.d)b={d,s:g.s0+u*g.l,tx:dx/g.l,ty:dy/g.l,px,py}}return b};
+  const names=new Set((r.eje||"").split(", ").filter(Boolean));const xs=[];stamp++;
+  query(D.ejG,D.ej,r.bb,stamp,f=>{if(names.has(f.name))return;for(const p of f.parts)for(let i=2;i<p.length;i+=2)for(const g of S){const t=segX(g.ax,g.ay,g.bx,g.by,p[i-2],p[i-1],p[i],p[i+1]);if(t!==null)xs.push(g.s0+t*g.l)}});
+  const excl=[[0,ex],[Lt-ex,Lt],...xs.map(x=>[x-ex,x+ex])].sort((a,b)=>a[0]-b[0]);const eff=[];let pos=0;for(const [a,b] of excl){if(a>pos)eff.push([pos,a]);pos=Math.max(pos,b)}if(pos<Lt)eff.push([pos,Lt]);
+  const effL=eff.reduce((t,[a,b])=>t+b-a,0)||1;
+  const exp=EXPF[r.cuadro],iv={},dists={"1":[],"-1":[]},fids=new Set(),tipos={},obs={},smp=new Set(),step=2/K;
+  const bbT=[r.bb[0]-W,r.bb[1]-W,r.bb[2]+W,r.bb[3]+W];stamp++;
+  query(D.lG,D.l,bbT,stamp,f=>{if(f.baja)return;let used=false;
+    for(const p of f.parts)for(let i=2;i<p.length;i+=2){const ax=p[i-2],ay=p[i-1],bx=p[i],by=p[i+1],sl=Math.hypot(bx-ax,by-ay);if(sl<1e-9)continue;const n=Math.max(1,Math.ceil(sl/step)),sx=(bx-ax)/sl,sy=(by-ay)/sl;
+      for(let k=0;k<n;k++){const x0=ax+(bx-ax)*k/n,y0=ay+(by-ay)*k/n,x1=ax+(bx-ax)*(k+1)/n,y1=ay+(by-ay)*(k+1)/n,mx=(x0+x1)/2,my=(y0+y1)/2,q=proj(mx,my);
+        if(!q||q.d>W||Math.abs(q.tx*sx+q.ty*sy)<0.866)continue;
+        const side=(q.tx*(my-q.py)-q.ty*(mx-q.px))>0?"1":"-1";const a=proj(x0,y0).s,b=proj(x1,y1).s;
+        (iv[f.fam+side]||(iv[f.fam+side]=[])).push([Math.min(a,b),Math.max(a,b)]);used=true;
+        if(f.fam===exp){dists[side].push([q.d*K,sl/n*K]);fids.add(f.fid)}}}
+    if(used){tipos[f.tipo||"(sin tipo)"]=(tipos[f.tipo||"(sin tipo)"]||0)+1;if(f.fam===exp){obs[f.obs||"(vacío)"]=(obs[f.obs||"(vacío)"]||0)+1;if(f.smp)smp.add(f.smp)}}});
+  const cov=(fam,sd)=>{const l=iv[fam+sd]||[];let t=0;for(const [a,b] of eff)t+=unionLen(l,a,b);return Math.round(t/effL*1000)/1000};
+  out.cov_izq=cov(exp,"1");out.cov_der=cov(exp,"-1");out.dist_izq=wmed(dists["1"]);out.dist_der=wmed(dists["-1"]);
+  out.fids=[...fids];out.tipos=Object.entries(tipos).map(([k,v])=>`${k} (${v})`).join("; ");out.obs=Object.entries(obs).map(([k,v])=>`${k} (${v})`).join(", ");out.smp=[...smp].sort().join(", ");
+  const others=Object.keys(FAMNAME).filter(f=>f!==exp);let oc=0,ot="";for(const f of others){const v=Math.max(cov(f,"1"),cov(f,"-1"));if(v>oc){oc=v;ot=f}}
+  const hi=Math.max(out.cov_izq,out.cov_der),lo=Math.min(out.cov_izq,out.cov_der),one=r.cuadro==="5.5 a1"||r.cuadro==="5.5 a2";
+  out.estado=lo>=0.8||(one&&hi>=0.8)?"Completa":hi>=0.8?"Completa en un solo lado":hi>=0.2?"Parcial":oc>=0.5?`Cargada con otro tipo (${FAMNAME[ot]})`:"No está en lineas07";
+  if(r.cuadro==="5.4"){const di=out.dist_izq,dd=out.dist_der;
+    if(di!=null&&dd!=null){const sep=Math.round((di+dd)*100)/100;out.control=Math.abs(sep-r.ancho)<=2?(Math.abs(di-dd)<=2?"OK":`Ancho OK (${sep} m) pero el eje no está centrado (izq ${di} / der ${dd} m)`):`Ancho entre líneas ${sep} m ≠ ${r.ancho} m del cuadro`}
+    else if(di!=null||dd!=null){const x=di!=null?di:dd;out.control=Math.abs(x-r.dist)<=2?"OK (un lado)":`Un solo lado, a ${x} m del eje (cuadro: ${r.dist} m)`}}
+  return out}
+
+/* ---------- aplicar ediciones guardadas ---------- */
+const syncF=f=>{f.tipo=f.A.TIPO||"";f.fam=famOf(f.tipo);f.smp=f.A.SMP||"";f.obs=f.A.OBS||"";f.plano=f.A.PLANO||"";f.nro=f.A.NRO_ORD||"";f.texto=f.A.TEXTO||""};
+function blankA(){const o={};for(const c of D.cols)o[c]=(c==="FeatId1"||c==="ID_PARCELA")?0:"";return o}
+function applyRec(f,rec){if(rec.a)f.A=Object.assign({},f.A,rec.a);if(rec.g&&rec.g.length){const p=partsFromPG(rec.g);if(p.length){f.parts=p;f.bb=bboxOf(p);f.gEdit=rec.g}}f.baja=!!rec.baja;f.edit=rec}
+const clean=o=>{const r={};for(const [k,v] of Object.entries(o||{}))if(v)r[k]=v;return r};
+function applyEdits(){if(!D.ready)return;
+  st.edL=clean(Object.assign({},st.remL,st.pendL));st.edT=clean(Object.assign({},st.remT,st.pendT));
+  D.l=D.l.filter(f=>!f.nueva);
+  for(const f of D.l){f.A=Object.assign({},f.A0);f.parts=f.parts0;f.bb=f.bb0;f.baja=false;f.edit=null;f.gEdit=null}
+  const touched=[];
+  for(const [k,rec] of Object.entries(st.edL)){
+    if(k[0]==="f"){const i=D.lByFid0.get(+k.slice(1));if(i===undefined)continue;const f=D.l[i];touched.push(f.bb0);applyRec(f,rec);touched.push(f.bb)}
+    else if(rec.nueva&&rec.g&&rec.g.length){const f={fid:k,nueva:true,A0:blankA(),parts0:[],bb0:null};f.A=Object.assign({},f.A0);applyRec(f,rec);if(f.parts.length){D.l.push(f);touched.push(f.bb)}}}
+  D.l.forEach(syncF);D.lG=grid(D.l);D.lByFid=new Map(D.l.map((f,i)=>[f.fid,i]));
+  const aff=new Set();
+  for(const r of st.tr){r.parts=r.parts0;r.bb=r.bb0;r.manual="";r.edited=false;r.calc=null;r.tedit=null}
+  for(const [id,rec] of Object.entries(st.edT)){const r=st.trById[id];if(!r)continue;r.tedit=rec;if(rec.g&&rec.g.length){const p=partsFromPG(rec.g);if(p.length){r.parts=p;r.bb=bboxOf(p);r.edited=true;aff.add(r)}}r.manual=rec.estado_manual||""}
+  for(const r of st.tr){if(!r.bb)continue;const w=Wreal(r)*1.6/0.82;for(const b of touched){if(b&&!(b[2]<r.bb[0]-w||b[0]>r.bb[2]+w||b[3]<r.bb[1]-w||b[1]>r.bb[3]+w)){aff.add(r);break}}}
+  for(const r of aff)r.calc=recompute(r);
+  st.fid2tr={};for(const r of st.tr)for(const f of cvOf(r).fids)(st.fid2tr[f]||(st.fid2tr[f]=[])).push(r.id);
+  if(st.sel){const r=st.selKind==="tr"?st.trById[st.sel]:st.srById[st.sel];if(r)st.hl=hlFor(r)}
+  edTabUI()}
+const hlFor=r=>new Set((cvOf(r).fids||r.fids).map(f=>D.lByFid.get(f)).filter(i=>i!==undefined));
+
+/* ---------- guardar una edición (cola local + publicación) ---------- */
+function needName(cb){if(cfg.nombre)return false;resumeEdit=cb;openCfg("Antes de guardar, escribí tu nombre: queda en el historial de cada edición.");return true}
+let resumeEdit=null;
+function pushHist(prev,accion){return [{accion,por:cfg.nombre,fecha:nowISO()},...((prev&&prev.hist)||[])].slice(0,20)}
+function saveEditL(key,patch,accion){if(needName(()=>saveEditL(key,patch,accion)))return;const prev=st.edL[key]||{};
+  const rec=Object.assign({},prev,patch,{por:cfg.nombre,fecha:nowISO(),hist:pushHist(prev,accion)});st.pendL[key]=rec;LS.set("l07pendL",st.pendL);afterEdit()}
+function saveEditT(id,patch,accion){if(needName(()=>saveEditT(id,patch,accion)))return;const prev=st.edT[id]||{};
+  const rec=Object.assign({},prev,patch,{por:cfg.nombre,fecha:nowISO(),hist:pushHist(prev,accion)});
+  if(!rec.g&&!rec.estado_manual){st.pendT[id]=null}else st.pendT[id]=rec;LS.set("l07pendT",st.pendT);afterEdit()}
+function undoEdit(kind,key){if(kind==="l")st.pendL[key]=null;else st.pendT[key]=null;LS.set("l07pendL",st.pendL);LS.set("l07pendT",st.pendT);afterEdit()}
+function afterEdit(){applyEdits();refreshAfterRev();if(cfg.token&&cfg.owner&&cfg.repo)publish();else say("Guardado en este navegador. Falta publicarlo en GitHub.")}
+
+/* ---------- editor de geometría ---------- */
+const ED={on:false};
+function startEdit(kind,id,opts={}){if(ED.on)stopEdit();
+  let parts=[];if(kind==="tr"){const r=st.trById[id];parts=r.parts||[]}else if(kind==="l"){const f=D.l[D.lByFid.get(id)];parts=f?f.parts:[]}
+  Object.assign(ED,{on:true,kind,id,opts,sel:null,snap:ED.snap!==false,parts:parts.map(p=>{const o=[];for(let i=0;i<p.length;i+=2)o.push([p[i],p[i+1]]);return o})});
+  ED.mode=ED.parts.length&&!opts.redraw?"edit":"draw";if(ED.mode==="draw")ED.parts=[[]];
+  ED.layer=L.layerGroup().addTo(map);map.doubleClickZoom.disable();
+  $("#edBar").hidden=false;$("#edTitle").textContent=kind==="tr"?`Trazado de ${id}`:kind==="new"?"Nueva línea de lineas07":`Geometría de la línea ${id}`;
+  edButtons();handles();draw()}
+function stopEdit(){if(ED.layer)map.removeLayer(ED.layer);ED.on=false;ED.layer=null;$("#edBar").hidden=true;mapEl.classList.remove("crosshair");map.doubleClickZoom.enable();draw()}
+function edButtons(){for(const b of document.querySelectorAll("#edBar [data-mode]"))b.setAttribute("aria-pressed",String(b.dataset.mode===ED.mode));
+  $("#edSnap").checked=ED.snap;mapEl.classList.toggle("crosshair",ED.mode!=="edit");
+  $("#edHint").textContent=ED.mode==="edit"?"Arrastrá los vértices. Clic en un punto intermedio agrega un vértice; clic derecho o «Borrar vértice» lo quita.":ED.mode==="append"?"Clic en el mapa agrega vértices al extremo del vértice elegido (o al final).":"Clic en el mapa para marcar cada vértice. Tocá «Mover vértices» o «Guardar» para terminar."}
+const vIcon=on=>L.divIcon({className:"vx"+(on?" on":""),iconSize:[14,14]});
+const mIcon=L.divIcon({className:"vm",iconSize:[10,10]});
+function handles(){ED.layer.clearLayers();
+  ED.parts.forEach((p,pi)=>{p.forEach(([x,y],vi)=>{const on=ED.sel&&ED.sel[0]===pi&&ED.sel[1]===vi;const m=L.marker(U(x,y),{icon:vIcon(on),draggable:true,keyboard:false,zIndexOffset:1000}).addTo(ED.layer);
+      m.on("drag",e=>{const P=Pm(e.target.getLatLng());p[vi]=[P.x,P.y];draw()});
+      m.on("dragend",e=>{const P=Pm(e.target.getLatLng());p[vi]=ED.snap?snapPt(P.x,P.y):[P.x,P.y];ED.sel=[pi,vi];handles();draw()});
+      m.on("click",e=>{L.DomEvent.stopPropagation(e);ED.sel=[pi,vi];handles()});
+      m.on("contextmenu",e=>{L.DomEvent.stopPropagation(e);L.DomEvent.preventDefault(e.originalEvent);delVertex(pi,vi)})});
+    if(ED.mode==="edit")for(let vi=1;vi<p.length;vi++){const a=p[vi-1],b=p[vi];const m=L.marker(U((a[0]+b[0])/2,(a[1]+b[1])/2),{icon:mIcon,keyboard:false}).addTo(ED.layer);
+      m.on("click",e=>{L.DomEvent.stopPropagation(e);p.splice(vi,0,[(a[0]+b[0])/2,(a[1]+b[1])/2]);ED.sel=[pi,vi];handles();draw()})}})}
+function delVertex(pi,vi){const p=ED.parts[pi];if(!p)return;p.splice(vi,1);if(p.length===0)ED.parts.splice(pi,1);ED.sel=null;if(!ED.parts.length)ED.parts=[[]];handles();draw()}
+function snapPt(x,y){const t=T(),tol=10/t.s,bb=[x-tol,y-tol,x+tol,y+tol];let best=null,bd=tol;
+  const tryV=(px,py)=>{const d=Math.hypot(px-x,py-y);if(d<bd){bd=d;best=[px,py]}};
+  stamp++;query(D.lG,D.l,bb,stamp,f=>{if(ED.kind==="l"&&f.fid===ED.id)return;for(const p of f.parts)for(let i=0;i<p.length;i+=2)tryV(p[i],p[i+1])});
+  stamp++;query(D.ejG,D.ej,bb,stamp,f=>{for(const p of f.parts)for(let i=0;i<p.length;i+=2)tryV(p[i],p[i+1])});
+  if(best)return best;
+  let bs=null,bsd=tol*0.7;stamp++;query(D.lG,D.l,bb,stamp,f=>{if(ED.kind==="l"&&f.fid===ED.id)return;for(const p of f.parts)for(let i=2;i<p.length;i+=2){const ax=p[i-2],ay=p[i-1],dx=p[i]-ax,dy=p[i+1]-ay,l=dx*dx+dy*dy;if(!l)continue;let u=((x-ax)*dx+(y-ay)*dy)/l;u=u<0?0:u>1?1:u;const px=ax+u*dx,py=ay+u*dy,d=Math.hypot(px-x,py-y);if(d<bsd){bsd=d;bs=[px,py]}}});
+  return bs||[x,y]}
+function edMapClick(x,y){const P=ED.snap?snapPt(x,y):[x,y];
+  if(ED.mode==="draw"){ED.parts[ED.parts.length-1].push(P);handles();draw();return}
+  if(ED.mode==="append"){let pi=ED.sel?ED.sel[0]:ED.parts.length-1;const p=ED.parts[pi]||(ED.parts[pi]=[]);if(ED.sel&&ED.sel[1]===0&&p.length>1){p.unshift(P);ED.sel=[pi,0]}else{p.push(P);ED.sel=[pi,p.length-1]}handles();draw();return}
+  ED.sel=null;handles()}
+function edSave(){const parts=ED.parts.filter(p=>p.length>=2);
+  if(!parts.length){say("El trazado necesita al menos dos vértices.");return}
+  const g=parts.map(p=>p.map(([x,y])=>m2pg(x,y)));const {kind,id,opts}=ED;stopEdit();
+  if(kind==="tr")saveEditT(id,{g},"Trazado editado");
+  else if(kind==="l")saveEditL("f"+id,{g},"Geometría editada");
+  else if(kind==="new"){const key="n"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);saveEditL(key,{nueva:true,g,a:Object.assign(blankA(),opts.a||{})},"Línea nueva");
+    setTimeout(()=>{const i=D.lByFid.get(key);if(i!==undefined){const f=D.l[i];const c=f.parts[0];attrForm(i,c[0],c[1],true)}},50)}}
+
+/* ---------- formulario de atributos de lineas07 ---------- */
+function lineKey(f){return f.nueva?f.fid:"f"+f.fid}
+function attrForm(i,x,y,isNew){const f=D.l[i];if(!f)return;st.hl=new Set([i]);const el=$("#insp");
+  const tipos=[...new Set(D.l.map(g=>g.A.TIPO).filter(Boolean))].sort(),obss=[...new Set(D.l.map(g=>g.A.OBS).filter(Boolean))].sort();
+  const inp=(c,lab,w)=>`<label for="at_${c}">${lab}<input id="at_${c}" data-col="${c}" ${w?`list="${w}"`:""} value="${esc(f.A[c]??"")}"></label>`;
+  el.innerHTML=`<h3><span>${isNew?"Atributos de la línea nueva":"Editar atributos"} <span class="mono">${esc(f.nueva?"nueva":"FID "+f.fid)}</span></span><button class="x" aria-label="Cerrar">×</button></h3>
+  <form class="attr" id="attrForm"><div class="row2">${inp("SMP","SMP")}<button class="btn" type="button" id="atSplit" title="Completar sección, manzana y parcela a partir del SMP">← desde SMP</button></div>
+  <div class="row3">${inp("SECCION","Sección")}${inp("MANZANA","Manzana")}${inp("PARCELA","Parcela")}</div>
+  ${inp("TIPO","TIPO","dlTipos")}${inp("NRO_ORD","NRO_ORD")}<div class="row2">${inp("OBS","OBS","dlObs")}${inp("PLANO","PLANO")}</div>
+  <label for="at_TEXTO">TEXTO<textarea id="at_TEXTO" data-col="TEXTO" maxlength="254">${esc(f.A.TEXTO||"")}</textarea></label>
+  <div class="row2">${inp("FeatId1","FeatId1")}${inp("ID_PARCELA","ID_PARCELA")}</div>
+  <datalist id="dlTipos">${tipos.map(t=>`<option value="${esc(t)}">`).join("")}</datalist><datalist id="dlObs">${obss.map(t=>`<option value="${esc(t)}">`).join("")}</datalist>
+  <div class="act"><button class="btn primary" type="submit">Guardar atributos</button><button class="btn" type="button" id="atCancel">Cancelar</button></div></form>`;
+  el.hidden=false;draw();
+  $("#atSplit").onclick=()=>{const m=$("#at_SMP").value.trim().split("-");if(m.length>=2){$("#at_SECCION").value=m[0]||"";$("#at_MANZANA").value=m[1]||"";$("#at_PARCELA").value=m[2]||""}};
+  $("#atCancel").onclick=()=>inspect({k:"l",i:D.lByFid.get(f.fid)},x,y);
+  $("#attrForm").addEventListener("submit",e=>{e.preventDefault();const a={};for(const q of el.querySelectorAll("[data-col]")){const c=q.dataset.col;let v=q.value.trim();if(c==="FeatId1"||c==="ID_PARCELA")v=parseInt(v,10)||0;a[c]=v}
+    const changed=Object.keys(a).filter(c=>String(a[c])!==String(f.A[c]??""));if(!changed.length&&!isNew){inspect({k:"l",i},x,y);return}
+    saveEditL(lineKey(f),{a:Object.assign({},(st.edL[lineKey(f)]||{}).a||{},a)},isNew?"Atributos de línea nueva":"Atributos: "+changed.join(", "));
+    setTimeout(()=>{const j=D.lByFid.get(f.fid);if(j!==undefined)inspect({k:"l",i:j},x,y)},30)})}
+
+/* ---------- panel de edición del tramo ---------- */
+function tramoEditBox(r){const te=r.tedit;const c=r.calc;
+  return `<div class="editbox"><h4>Trazado y estado del tramo</h4>
+  <div class="note">${r.edited?`Trazado editado por ${esc(te.por||"—")} el ${fmtD(te.fecha)}. El cruce con lineas07 se recalculó sobre este trazado.`:r.parts.length?"Trazado automático, armado sobre los ejes de calle.":"Este tramo no tiene trazado: dibujalo para poder compararlo con lineas07."}${c&&!r.edited?" El cruce se recalculó porque cambiaron líneas de lineas07 cercanas.":""}</div>
+  <div class="act">${r.parts.length?`<button class="btn" type="button" data-ed="edit">Editar trazado</button><button class="btn" type="button" data-ed="redraw">Dibujar de nuevo</button>`:`<button class="btn primary" type="button" data-ed="redraw">Dibujar trazado</button>`}
+  ${r.edited?`<button class="btn" type="button" data-ed="restore">Volver al automático</button>`:""}<button class="btn" type="button" data-ed="newline" title="Dibujar en lineas07 la línea que corresponde a este tramo">Agregar línea en lineas07</button></div>
+  <label for="estMan">Estado manual<select id="estMan"><option value="">Automático (${esc(r.calc?r.calc.estado:r.estado)})</option>${ESTADOS.map(e=>`<option ${r.manual===e?"selected":""}>${esc(e)}</option>`).join("")}</select></label>
+  <div class="act"><button class="btn" type="button" data-ed="estado">Guardar estado</button>${r.manual?`<span class="note">Estado puesto a mano por ${esc(te&&te.por||"—")}</span>`:""}</div></div>`}
+function wireTramoEdit(r){const host=$("#detTr");for(const b of host.querySelectorAll("[data-ed]"))b.onclick=()=>{const a=b.dataset.ed;
+  if(a==="edit")startEdit("tr",r.id);else if(a==="redraw")startEdit("tr",r.id,{redraw:true});
+  else if(a==="restore")saveEditT(r.id,{g:null},"Trazado automático restaurado");
+  else if(a==="estado"){const v=$("#estMan").value;saveEditT(r.id,{estado_manual:v||null},v?`Estado manual: ${v}`:"Estado automático restaurado")}
+  else if(a==="newline")startEdit("new",null,{a:prefillFor(r)})}}
+function prefillFor(r){const tipo=r.cuadro==="5.4"?"Línea particularizada.":r.cuadro==="5.5 b"?"Apertura de calle":"Línea de afectación.";
+  const nro=r.cuadro.startsWith("5.4")||r.norma.startsWith("CUR")?"Ley Nro. 6099 G.C.B.A 2018 B.O. 5526.":r.norma;
+  const que=r.cuadro==="5.5 b"?`Apertura de calle ${r.calle.toUpperCase()} desde ${r.desde.toUpperCase()} hasta ${r.hasta.toUpperCase()}.`:`${tipo.replace(/\.$/,"")} sobre ${r.calle.toUpperCase()} de ${r.desde.toUpperCase()} a ${r.hasta.toUpperCase()}.`;
+  return {TIPO:tipo,NRO_ORD:nro,OBS:"EN ESTUDIO",TEXTO:(nro+" "+que).slice(0,254)}}
+
+/* ---------- pestaña Ediciones ---------- */
+function edTabUI(){const L1=Object.entries(st.edT),L2=Object.entries(st.edL);const n=L1.length+L2.length;$("#nEd").textContent=n||"";
+  const pend=k=>(k in st.pendT||k in st.pendL)?' <span class="chip k-warn">sin publicar</span>':"";
+  const rowsT=L1.map(([id,rec])=>`<div class="row" data-k="t" data-id="${id}"><span class="id">${id}</span><span class="t">${esc((st.trById[id]||{}).calle||"")}</span><span class="cu">tramo</span><span class="s">${[rec.g?"trazado editado":"",rec.estado_manual?"estado: "+esc(rec.estado_manual):""].filter(Boolean).join(" · ")} · ${esc(rec.por||"")} ${fmtD(rec.fecha)}${pend(id)}</span><span class="chips"><button class="btn sm" type="button" data-undo="t" data-id="${id}">Deshacer</button></span></div>`).join("");
+  const rowsL=L2.map(([k,rec])=>{const f=D.l[D.lByFid.get(k[0]==="f"?+k.slice(1):k)];const what=[rec.nueva?"línea nueva":"",rec.baja?"dada de baja":"",rec.g&&!rec.nueva?"geometría":"",rec.a&&!rec.nueva?"atributos":""].filter(Boolean).join(" · ");
+    return `<div class="row" data-k="l" data-id="${esc(k)}"><span class="id">${k[0]==="f"?"FID "+k.slice(1):"nueva"}</span><span class="t">${esc(f?(f.A.TIPO||"(sin tipo)"):"(no disponible)")}</span><span class="cu">lineas07</span><span class="s">${what} · ${esc(rec.por||"")} ${fmtD(rec.fecha)}${pend(k)}</span><span class="chips"><button class="btn sm" type="button" data-undo="l" data-id="${esc(k)}">Deshacer</button></span></div>`}).join("");
+  $("#listEd").innerHTML=n?rowsT+rowsL:'<div class="empty">Todavía no hay ediciones. Elegí un tramo para editar su trazado o su estado, o hacé clic en una línea de lineas07 para editar sus atributos.</div>'}
+$("#listEd").addEventListener("click",e=>{const u=e.target.closest("[data-undo]");if(u){e.stopPropagation();undoEdit(u.dataset.undo,u.dataset.id);return}
+  const r=e.target.closest(".row");if(!r)return;if(r.dataset.k==="t"){showTab("tr");select("tr",r.dataset.id,true)}else{const k=r.dataset.id;const i=D.lByFid.get(k[0]==="f"?+k.slice(1):k);if(i!==undefined){const f=D.l[i];fitBB(f.bb,40);const c=f.parts[0];st.mark=null;inspect({k:"l",i},c[0],c[1])}}});
+
+/* ---------- exportación: DXF (R12) y Shapefile en CABA-PG07 ---------- */
+const CP1252={0x20AC:0x80,0x201A:0x82,0x0192:0x83,0x201E:0x84,0x2026:0x85,0x2020:0x86,0x2021:0x87,0x02C6:0x88,0x2030:0x89,0x0160:0x8A,0x2039:0x8B,0x0152:0x8C,0x017D:0x8E,0x2018:0x91,0x2019:0x92,0x201C:0x93,0x201D:0x94,0x2022:0x95,0x2013:0x96,0x2014:0x97,0x02DC:0x98,0x2122:0x99,0x0161:0x9A,0x203A:0x9B,0x0153:0x9C,0x017E:0x9E,0x0178:0x9F};
+function enc1252(s){const o=new Uint8Array(s.length);for(let i=0;i<s.length;i++){const c=s.charCodeAt(i);o[i]=c<0x80||(c>=0xA0&&c<0x100)?c:(CP1252[c]||0x3F)}return o}
+const LAYERS={part:["L07_PARTICULARIZADA",5],afec:["L07_AFECTACION",30],aper:["L07_APERTURA",3],serv:["L07_SERVIDUMBRE",6],rect:["L07_RECTIFICACION",221],otro:["L07_OTROS",8],baja:["L07_BAJA",9]};
+function dxfR12(ents,layers,app){const o=[];const p=(c,v)=>{o.push(String(c));o.push(String(v))};
+  p(0,"SECTION");p(2,"HEADER");p(9,"$ACADVER");p(1,"AC1009");p(9,"$DWGCODEPAGE");p(3,"ANSI_1252");p(0,"ENDSEC");
+  p(0,"SECTION");p(2,"TABLES");
+  p(0,"TABLE");p(2,"LTYPE");p(70,1);p(0,"LTYPE");p(2,"CONTINUOUS");p(70,0);p(3,"Solid line");p(72,65);p(73,0);p(40,"0.0");p(0,"ENDTAB");
+  p(0,"TABLE");p(2,"LAYER");p(70,layers.length+1);p(0,"LAYER");p(2,"0");p(70,0);p(62,7);p(6,"CONTINUOUS");for(const [n,c] of layers){p(0,"LAYER");p(2,n);p(70,0);p(62,c);p(6,"CONTINUOUS")}p(0,"ENDTAB");
+  p(0,"TABLE");p(2,"APPID");p(70,2);p(0,"APPID");p(2,"ACAD");p(70,0);p(0,"APPID");p(2,app);p(70,0);p(0,"ENDTAB");p(0,"ENDSEC");
+  p(0,"SECTION");p(2,"ENTITIES");
+  for(const e of ents){p(0,"POLYLINE");p(8,e.layer);p(66,1);p(10,"0.0");p(20,"0.0");p(30,"0.0");p(70,0);
+    if(e.xd&&e.xd.length){p(1001,app);for(const s of e.xd){let t=String(s).replace(/[\r\n]+/g," ");do{p(1000,t.slice(0,240));t=t.length>240?"+"+t.slice(240):""}while(t)}}
+    for(const [x,y] of e.pts){p(0,"VERTEX");p(8,e.layer);p(10,x.toFixed(3));p(20,y.toFixed(3));p(30,"0.0")}p(0,"SEQEND");p(8,e.layer)}
+  p(0,"ENDSEC");p(0,"EOF");return enc1252(o.join("\r\n")+"\r\n")}
+function exportFeatures(withBaja){const out=[];for(const f of D.l){if(f.baja&&!withBaja)continue;const g=f.gEdit||(f.nueva?null:D.gpg[f.fid]);if(!g||!g.length)continue;out.push({f,g})}return out}
+function saveBlob(name,data,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([data],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)}
+const stampName=()=>new Date().toISOString().slice(0,10);
+function exportDXF(){const wb=$("#exBaja").checked;const ents=[];
+  for(const {f,g} of exportFeatures(wb)){const lay=f.baja?LAYERS.baja[0]:LAYERS[f.fam][0];const xd=D.cols.map(c=>`${c}=${f.A[c]??""}`);if(f.edit)xd.push(`EDITADO=${f.edit.por||""} ${(f.edit.fecha||"").slice(0,10)}`);if(f.baja)xd.push("BAJA=SI");
+    for(const part of g)ents.push({layer:lay,pts:part,xd})}
+  saveBlob(`lineas07_editado_${stampName()}.dxf`,dxfR12(ents,Object.values(LAYERS),"LINEAS07"),"application/dxf");say(`DXF generado con ${ents.length} polilíneas`)}
+function exportTramosDXF(){const ents=[];const lay=e=>"CUR_"+estShort(e).toUpperCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Z0-9]+/g,"_").replace(/^_|_$/g,"");const lays=new Map();
+  for(const r of st.tr){if(!r.parts.length)continue;const e=est(r),ln=lay(e);lays.set(ln,estKind(e)==="k-ok"?3:estKind(e)==="k-bad"?1:estKind(e)==="k-info"?5:estKind(e)==="k-na"?8:40);
+    const v=st.rev[r.id]||{};const xd=[`ID=${r.id}`,`CUADRO=${r.cuadro}`,`CALLE=${r.calle}`,`DESDE=${r.desde}`,`HASTA=${r.hasta}`,`ESTADO=${e}`,`ESTADO_MANUAL=${r.manual?"SI":"NO"}`,`TRAZADO=${r.edited?"EDITADO":"AUTOMATICO"}`,`REVISION=${revOf(r.id)}`,`NORMA_REVISION=${v.norma||""}`];
+    for(const g of partsToPG(r.parts))ents.push({layer:ln,pts:g,xd})}
+  saveBlob(`tramos_CUR_${stampName()}.dxf`,dxfR12(ents,[...lays],"CRUCE_CUR"),"application/dxf");say(`DXF de tramos generado (${ents.length} polilíneas)`)}
+function shpFiles(items){// items: [{parts:[[[x,y]..]..], A}]
+  const n=items.length;let shpLen=100,recs=[];let gb=[1e20,1e20,-1e20,-1e20];
+  for(const it of items){const np=it.parts.reduce((t,p)=>t+p.length,0);const cl=44+4*it.parts.length+16*np;recs.push({it,np,cl});shpLen+=8+cl;for(const p of it.parts)for(const [x,y] of p){if(x<gb[0])gb[0]=x;if(y<gb[1])gb[1]=y;if(x>gb[2])gb[2]=x;if(y>gb[3])gb[3]=y}}
+  const shp=new DataView(new ArrayBuffer(shpLen)),shx=new DataView(new ArrayBuffer(100+8*n));
+  const head=(dv,len)=>{dv.setInt32(0,9994,false);dv.setInt32(24,len/2,false);dv.setInt32(28,1000,true);dv.setInt32(32,3,true);dv.setFloat64(36,gb[0],true);dv.setFloat64(44,gb[1],true);dv.setFloat64(52,gb[2],true);dv.setFloat64(60,gb[3],true)};
+  head(shp,shpLen);head(shx,100+8*n);let off=100;
+  recs.forEach(({it,np,cl},i)=>{shx.setInt32(100+8*i,off/2,false);shx.setInt32(104+8*i,cl/2,false);shp.setInt32(off,i+1,false);shp.setInt32(off+4,cl/2,false);let q=off+8;
+    let b=[1e20,1e20,-1e20,-1e20];for(const p of it.parts)for(const [x,y] of p){if(x<b[0])b[0]=x;if(y<b[1])b[1]=y;if(x>b[2])b[2]=x;if(y>b[3])b[3]=y}
+    shp.setInt32(q,3,true);q+=4;for(const v of b){shp.setFloat64(q,v,true);q+=8}shp.setInt32(q,it.parts.length,true);q+=4;shp.setInt32(q,np,true);q+=4;
+    let k=0;for(const p of it.parts){shp.setInt32(q,k,true);q+=4;k+=p.length}for(const p of it.parts)for(const [x,y] of p){shp.setFloat64(q,x,true);shp.setFloat64(q+8,y,true);q+=16}off+=8+cl});
+  const F=D.cols.map(c=>({c,t:(c==="FeatId1"||c==="ID_PARCELA")?"N":"C",w:(c==="FeatId1"||c==="ID_PARCELA")?11:254}));
+  const recLen=1+F.reduce((t,f)=>t+f.w,0),hl=32+32*F.length+1;const dbf=new Uint8Array(hl+recLen*n+1);const dv=new DataView(dbf.buffer);const d=new Date();
+  dbf[0]=3;dbf[1]=d.getFullYear()-1900;dbf[2]=d.getMonth()+1;dbf[3]=d.getDate();dv.setInt32(4,n,true);dv.setInt16(8,hl,true);dv.setInt16(10,recLen,true);dbf[29]=0x57;
+  F.forEach((f,i)=>{const o=32+32*i;for(let j=0;j<f.c.length;j++)dbf[o+j]=f.c.charCodeAt(j);dbf[o+11]=f.t.charCodeAt(0);dbf[o+16]=f.w;dbf[o+17]=0});dbf[hl-1]=0x0D;
+  items.forEach((it,i)=>{let o=hl+recLen*i;dbf[o++]=0x20;for(const f of F){let v=it.A[f.c];v=v==null?"":String(v);let b=enc1252(v.replace(/[\r\n]+/g," "));if(b.length>f.w)b=b.slice(0,f.w);
+      if(f.t==="N"){const pad=f.w-b.length;for(let j=0;j<f.w;j++)dbf[o+j]=j<pad?0x20:b[j-pad]}else{for(let j=0;j<f.w;j++)dbf[o+j]=j<b.length?b[j]:0x20}o+=f.w}});
+  dbf[dbf.length-1]=0x1A;return{shp:shp.buffer,shx:shx.buffer,dbf}}
+async function exportSHP(){if(typeof JSZip==="undefined"){say("No se pudo cargar el compresor ZIP. Recargá la página.");return}
+  const items=exportFeatures(false).map(({f,g})=>({parts:g,A:f.A}));const fl=shpFiles(items);const z=new JSZip();const b="lineas07_editado";
+  z.file(b+".shp",fl.shp);z.file(b+".shx",fl.shx);z.file(b+".dbf",fl.dbf);z.file(b+".prj",D.prj);z.file(b+".cpg","1252");
+  const blob=await z.generateAsync({type:"blob"});saveBlob(`${b}_${stampName()}.zip`,blob,"application/zip");say(`Shapefile generado con ${items.length} líneas`)}
+$("#exDxf").onclick=exportDXF;$("#exShp").onclick=exportSHP;$("#exTr").onclick=exportTramosDXF;
+$("#newLineBtn").onclick=()=>{const r=st.selKind==="tr"&&st.trById[st.sel];startEdit("new",null,{a:r?prefillFor(r):{}})};
+
+/* ---------- barra del editor ---------- */
+$("#edBar").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.mode){ED.mode=b.dataset.mode;if(ED.mode==="draw"){ED.parts.push([]);ED.sel=null}edButtons();handles();return}
+  if(b.id==="edDel"){if(ED.sel)delVertex(ED.sel[0],ED.sel[1]);else say("Elegí primero un vértice");return}
+  if(b.id==="edSave")return edSave();if(b.id==="edCancel")return stopEdit()});
+$("#edSnap").addEventListener("change",e=>{ED.snap=e.target.checked});
+document.addEventListener("keydown",e=>{if(!ED.on)return;if((e.key==="Delete"||e.key==="Backspace")&&ED.sel&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();delVertex(ED.sel[0],ED.sel[1])}if(e.key==="Escape"){ED.sel=null;handles()}});
 
 /* ---------- base map selector ---------- */
 $("#lgBase").innerHTML=BASES.map(([k,n])=>`<label><input type="radio" name="base" value="${k}"> ${esc(n)}</label>`).join("");

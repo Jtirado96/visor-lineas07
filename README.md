@@ -74,6 +74,29 @@ Cada afectación que estudiás se registra en su ficha del visor. Cada registro 
    - Con **CSV** bajás la tabla completa para el informe.
 7. **Consultá el procedimiento completo en GitHub.** En el repositorio, la pestaña **Commits** muestra cada revisión publicada, con fecha y autor. El historial de `data/revision.json` muestra qué cambió en cada paso.
 
+## Editar tramos y lineas07 desde el visor
+
+Todas las ediciones se guardan en `data/revision.json` junto con las revisiones (con token se publican al instante; sin token quedan en el navegador hasta «Guardar en GitHub»). Cada cambio queda en el historial y se puede deshacer desde la pestaña **Ediciones**.
+
+**Corregir el trazado de un tramo del CUR.** En la ficha del tramo, bloque *Trazado y estado del tramo*:
+- **Editar trazado**: arrastrá los vértices; clic en un punto intermedio agrega un vértice, clic derecho (o «Borrar vértice») lo quita. **Extender** agrega vértices al final. Con **Imán** los vértices se pegan a lineas07 y a los ejes.
+- **Dibujar de nuevo**: borra el trazado y lo dibujás con clics sobre el mapa.
+- Al **Guardar**, el visor recalcula el cruce con lineas07 sobre el trazado nuevo (cobertura por lado, distancia, estado).
+- **Volver al automático** descarta el trazado editado.
+
+**Cambiar el estado a mano.** En *Estado manual* elegí, por ejemplo, «Completa» y tocá **Guardar estado**. La ficha muestra igual el estado calculado, y el CSV marca el estado como «(manual)».
+
+**Editar lineas07.** Clic sobre una línea del mapa:
+- **Editar atributos**: SMP, sección, manzana, parcela, TIPO, NRO_ORD, OBS, PLANO, TEXTO, etc. «← desde SMP» completa sección, manzana y parcela.
+- **Editar geometría**: igual que los tramos.
+- **Dar de baja / Reincorporar**: la línea queda punteada y deja de contar en el cruce.
+- **Línea nueva**: desde la ficha de un tramo («Agregar línea en lineas07», con los atributos precargados) o desde la pestaña Ediciones.
+
+**Descargar con los cambios** (pestaña Ediciones), en CABA-PG07:
+- **lineas07 (.dxf)**: una polilínea por parte, en capas por tipo (L07_PARTICULARIZADA, L07_AFECTACION, L07_APERTURA, …). Los atributos van como datos extendidos (XDATA, aplicación `LINEAS07`). Opcionalmente, las líneas dadas de baja en la capa L07_BAJA.
+- **lineas07 (Shapefile .zip)**: mismo esquema de campos que el original, con la tabla de atributos. Es la opción para llevar los datos a AutoCAD Map 3D como object data (MAPIMPORT).
+- **Tramos CUR (.dxf)**: los tramos con su estado, en capas CUR_<estado>.
+
 ## Actualizar las capas cuando corrijas lineas07
 
 Cuando des de baja o corrijas líneas en `lineas07.shp`, el visor sigue mostrando la copia del 15/10/2026 hasta que se regeneren los datos:
@@ -108,10 +131,11 @@ Las tres están en CABA-PG07 y se reproyectaron a Web Mercator (EPSG:3857) para 
 | Archivo | Contenido |
 |---|---|
 | `data/lineas07.json` | Trazado de afectaciones con su object data |
+| `data/lineas07_pg07.json` | lineas07 en CABA-PG07 con todos los atributos (para las descargas) |
 | `data/ejes.json` | Ejes de calle oficiales (nombre, tipo, alturas) |
 | `data/manzanas.json` | Manzanero (SM, tipo, superficie) |
 | `data/ciudad.json`, `data/contexto.json` | Contorno de la Ciudad y partidos vecinos (solo para «Sin mapa base») |
 | `data/cruce.json` | Tramos del CUR, estado del cruce y grupos sin respaldo |
-| `data/revision.json` | Seguimiento (lo escribe el visor) |
+| `data/revision.json` | Seguimiento y ediciones (lo escribe el visor) |
 
 Si cambian los shapefiles, hay que regenerar los `.json` de `data` (salvo `revision.json`, que conserva el seguimiento) y subirlos de nuevo.
