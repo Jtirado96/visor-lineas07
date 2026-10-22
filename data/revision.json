@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T18:35:02.518Z",
+ "actualizado": "2026-10-22T18:40:50.150Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -35,6 +35,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-20T19:36:06.581Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-074": {
+   "resultado": "Correcto",
+   "obs": "La apertura de la calle al día de hoy es parcial. El trazado de la linea de apertura se hace por la longitud de la calle que queda pendiente de apertura.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-22T18:40:49.618Z",
    "kind": "tr",
    "hist": []
   }
