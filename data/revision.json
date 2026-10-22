@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-22T18:05:59.722Z",
+ "actualizado": "2026-10-22T18:06:32.570Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -103,14 +103,20 @@
     "TEXTO": "Ord. N°23.475 Apertura de calle DARREGUEYRA desde SANTA FE, AV. hasta JUNCAL."
    },
    "por": "Junior",
-   "fecha": "2026-10-22T18:05:59.158Z",
+   "fecha": "2026-10-22T18:06:32.092Z",
    "hist": [
+    {
+     "accion": "Dada de baja",
+     "por": "Junior",
+     "fecha": "2026-10-22T18:06:32.092Z"
+    },
     {
      "accion": "Línea nueva",
      "por": "Junior",
      "fecha": "2026-10-22T18:05:59.158Z"
     }
-   ]
+   ],
+   "baja": true
   }
  },
  "tramos": {
