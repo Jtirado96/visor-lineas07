@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T19:09:17.724Z",
+ "actualizado": "2026-10-29T19:10:41.883Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -277,6 +277,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-29T18:18:39.737Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-091": {
+   "resultado": "Correcto",
+   "obs": "Linea07 dibujada sobre parte de la manzana que no tiene apertura de calle. Barrio Popular La Carbonilla.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T19:10:41.319Z",
    "kind": "tr",
    "hist": []
   }
