@@ -322,17 +322,28 @@ map.setView([-34.615,-58.445],12);
 const IGN=n=>`https://wms.ign.gob.ar/geoserver/gwc/service/tms/1.0.0/${n}@EPSG%3A3857@png/{z}/{x}/{-y}.png`;
 const ATT_IGN='<a href="https://www.ign.gob.ar/" target="_blank" rel="noopener">Argenmap · Instituto Geográfico Nacional</a>';
 const ATT_CARTO='© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> © <a href="https://carto.com/attributions" target="_blank" rel="noopener">CARTO</a>';
+const USIG=n=>`https://servicios.usig.buenosaires.gob.ar/mapcache/tms/1.0.0/${n}_3857@GoogleMapsCompatible/{z}/{x}/{-y}.png`;
+const ATT_USIG='<a href="https://github.com/datosgcba/tiles-gcba" target="_blank" rel="noopener">USIG · GCBA</a>';
+const CABA_BB=[[-34.715,-58.545],[-34.52,-58.33]];
 const BASES=[
   ["ign_gris","Argenmap gris (IGN)",IGN("mapabase_gris"),{maxNativeZoom:18,attribution:ATT_IGN}],
   ["ign","Argenmap (IGN)",IGN("capabaseargenmap"),{maxNativeZoom:18,attribution:ATT_IGN}],
   ["carto","Mapa claro (CARTO)","https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",{subdomains:"abcd",maxNativeZoom:20,attribution:ATT_CARTO}],
   ["osm","OpenStreetMap","https://tile.openstreetmap.org/{z}/{x}/{y}.png",{maxNativeZoom:19,attribution:'© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">colaboradores de OpenStreetMap</a>'}],
   ["sat","Satélite (Esri World Imagery)","https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{maxNativeZoom:19,attribution:"Imágenes © Esri, Maxar, Earthstar Geographics"}],
+  ["usig_mapa","Mapa oficial CABA (USIG)",USIG("mapa_oficial_caba"),{maxNativeZoom:18,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto2021","Fotografía aérea 2021 (GCBA)",USIG("fotografias_aereas_2021_caba"),{maxNativeZoom:18,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto2017","Fotografía aérea 2017 (GCBA)",USIG("fotografias_aereas_2017_caba"),{maxNativeZoom:18,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto2014","Fotografía aérea 2014 (GCBA)",USIG("fotografias_aereas_2014_caba"),{maxNativeZoom:18,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto1978","Fotografía aérea 1978 (GCBA)",USIG("fotografias_aereas_1978_caba"),{maxNativeZoom:17,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto1965","Fotografía aérea 1965 (GCBA)",USIG("fotografias_aereas_1965_caba"),{maxNativeZoom:17,bounds:CABA_BB,attribution:ATT_USIG}],
+  ["foto1940","Fotografía aérea 1940 (GCBA)",USIG("fotografias_aereas_1940_caba"),{maxNativeZoom:18,bounds:CABA_BB,attribution:ATT_USIG}],
   ["none","Sin mapa base (solo capas propias)",null,{}]];
 let baseLayer=null;
 function setBase(k){if(!BASES.some(b=>b[0]===k))k="ign_gris";st.base=k;try{localStorage.setItem("l07base",k)}catch(e){}
   if(baseLayer){map.removeLayer(baseLayer);baseLayer=null}const b=BASES.find(b=>b[0]===k);
-  if(b[2]){baseLayer=L.tileLayer(b[2],Object.assign({maxZoom:21},b[3])).addTo(map)}
+  if(b[2]){baseLayer=L.tileLayer(b[2],Object.assign({maxZoom:21},b[3])).addTo(map);let errs=0,oks=0;
+    baseLayer.on("tileload",()=>oks++);baseLayer.on("tileerror",()=>{errs++;if(errs===6&&!oks)say(`No se pudieron cargar las teselas de «${b[1]}». Puede ser un problema del servidor o de la red; probá con otro mapa base.`)})}
   $("#map").style.background=k==="none"?"var(--water)":"var(--bg)";
   const lg=$("#lgBase");if(lg)lg.querySelectorAll("input").forEach(i=>i.checked=i.value===k);draw()}
 const cv=$("#cv"),ctx=cv.getContext("2d");let DPR=1;

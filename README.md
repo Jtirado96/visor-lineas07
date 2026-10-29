@@ -121,9 +121,9 @@ Con el filtro activo, las pestañas **Tramos CUR** y **Sin respaldo** (y los tra
 - **Mapa claro**: CARTO, sobre datos de OpenStreetMap.
 - **OpenStreetMap**.
 - **Satélite**: Esri World Imagery.
+- **Mapa oficial CABA (USIG)** y **Fotografías aéreas del GCBA** de 2021, 2017, 2014, 1978, 1965 y 1940, desde el servidor de teselas de USIG ([datosgcba/tiles-gcba](https://github.com/datosgcba/tiles-gcba)). Cubren solo la Ciudad. Las de 1965 y 1978 llegan hasta zoom 17; más cerca se ven ampliadas.
 - **Sin mapa base**: usa solo las capas propias, con partidos vecinos y río de referencia.
 
-Los mapas de USIG (GCBA) no se pueden usar desde GitHub Pages. Su servidor de teselas solo funciona por http, y los navegadores bloquean esas imágenes dentro de un sitio https.
 
 ## Datos
 
