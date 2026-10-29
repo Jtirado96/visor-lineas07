@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T20:06:56.567Z",
+ "actualizado": "2026-10-29T20:42:17.439Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -393,6 +393,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-29T19:31:10.288Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-026": {
+   "resultado": "Correcto",
+   "obs": "Sin traza de linea07. S/MH-794-70 ancho de calle 25.99 - 25.96 (080-040-018) , S/M-49-98 ancho de calle 26.04 (080-043B-024a). S/MH-1154-78 ancho de calle 22.00 (080-043B-020). Respeta ancho de 26m en su extensión, no necesaria dibujar.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T20:42:16.608Z",
    "kind": "tr",
    "hist": []
   }
