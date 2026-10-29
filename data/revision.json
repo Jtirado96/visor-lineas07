@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T16:48:38.258Z",
+ "actualizado": "2026-10-29T16:48:57.918Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -112,6 +112,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-29T16:30:41.476Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-029": {
+   "resultado": "Correcto",
+   "obs": "",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T16:48:57.439Z",
    "kind": "tr",
    "hist": []
   }
