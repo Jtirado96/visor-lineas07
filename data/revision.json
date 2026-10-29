@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T19:12:47.737Z",
+ "actualizado": "2026-10-29T19:13:42.135Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -287,6 +287,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-29T19:10:41.319Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-092": {
+   "resultado": "Correcto",
+   "obs": "Continuación de la calle Curupaytí, al costado de las vías.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T19:13:41.462Z",
    "kind": "tr",
    "hist": []
   }
