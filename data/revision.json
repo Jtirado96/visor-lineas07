@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T20:42:17.439Z",
+ "actualizado": "2026-10-29T20:57:54.414Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -1598,6 +1598,26 @@
      "fecha": "2026-10-29T20:06:55.566Z"
     }
    ]
+  }
+ },
+ "notas": {
+  "Nmvu0yuoc": {
+   "texto": "Consultar por traza.",
+   "tipo": "Preguntar",
+   "para": "",
+   "estado": "Pendiente",
+   "ref": {
+    "kind": "tr",
+    "id": "CUR-026"
+   },
+   "pt": [
+    -6510850.6,
+    -4120180.7
+   ],
+   "creado": "2026-10-29T20:57:53.868Z",
+   "creadoPor": "Junior",
+   "por": "Junior",
+   "fecha": "2026-10-29T20:57:53.869Z"
   }
  }
 }
