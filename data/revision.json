@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T19:16:29.680Z",
+ "actualizado": "2026-10-29T19:16:56.615Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -297,6 +297,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-10-29T19:13:41.462Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-098": {
+   "resultado": "Correcto",
+   "obs": "Linea07 dibujada sobre vias de ferrocarril.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T19:16:55.997Z",
    "kind": "tr",
    "hist": []
   }
