@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T17:45:03.238Z",
+ "actualizado": "2026-10-29T17:47:14.539Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -910,6 +910,37 @@
      "accion": "Estado manual: Completa",
      "por": "Junior",
      "fecha": "2026-10-29T17:45:02.252Z"
+    }
+   ]
+  },
+  "CUR-086": {
+   "g": [
+    [
+     [
+      23981.772,
+      67718.586
+     ],
+     [
+      24009.07,
+      67749.501
+     ],
+     [
+      24094.924,
+      67843.002
+     ],
+     [
+      24112.803,
+      67860.948
+     ]
+    ]
+   ],
+   "por": "Junior",
+   "fecha": "2026-10-29T17:47:13.308Z",
+   "hist": [
+    {
+     "accion": "Trazado editado",
+     "por": "Junior",
+     "fecha": "2026-10-29T17:47:13.308Z"
     }
    ]
   }
