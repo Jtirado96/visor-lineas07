@@ -74,6 +74,18 @@ Cada afectación que estudiás se registra en su ficha del visor. Cada registro 
    - Con **CSV** bajás la tabla completa para el informe.
 7. **Consultá el procedimiento completo en GitHub.** En el repositorio, la pestaña **Commits** muestra cada revisión publicada, con fecha y autor. El historial de `data/revision.json` muestra qué cambió en cada paso.
 
+## Herramientas de medición
+
+El botón con la regla, a la derecha del mapa, abre la barra **Medir**. Todas las medidas se calculan en CABA-PG07, así coinciden con AutoCAD.
+
+- **Distancia**: clics sucesivos; muestra cada tramo y el total. Doble clic, Enter o «Terminar» cierra la medición; Retroceso borra el último punto.
+- **Perpendicular**: primero un clic sobre la línea de referencia (lineas07, eje o frente de manzana) y después sobre otra línea o un punto. Mide en ángulo recto; podés seguir haciendo clic para medir en otros lugares contra la misma referencia.
+- **Ancho de calle**: un clic en la calzada mide el ancho entre los dos frentes de manzana (líneas oficiales). Además informa a qué distancia de la L.O. están el eje y las líneas de lineas07 que cruzan esa medida, dentro de la calzada o dentro de la manzana.
+- **Superficie**: polígono por clics; da el área en m² y el perímetro.
+- **Imán**: pega los puntos a vértices y líneas de lineas07, ejes y manzanas. Se puede desactivar.
+- **Guardar como nota** guarda la última medición en Notas, con sus coordenadas.
+- Al hacer clic en una línea de lineas07, la ficha muestra su **largo**.
+
 ## Notas para estudiar o preguntar después
 
 La pestaña **Notas** es una lista de pendientes compartida:

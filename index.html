@@ -137,6 +137,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .chip.k-nE{background:var(--info-soft);color:var(--info)}.chip.k-nP{background:var(--warn-soft,#fff1d6);color:var(--warn,#8a5a00)}.chip.k-nC{background:var(--bad-soft);color:var(--bad)}
 .notebox{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:8px;display:grid;gap:6px}
 .notebox ul{margin:0;padding-left:18px;font-size:12.5px}
+#map.crosshair,#map.crosshair.leaflet-grab,#map.crosshair .leaflet-interactive{cursor:crosshair}
 .btn.danger{border-color:var(--bad);color:var(--bad)}
 .editbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;display:grid;gap:8px}
 .editbox h4,.layers h4.x{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -281,6 +282,10 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
       <canvas id="cv"></canvas>
       <div class="loading" id="loading">Cargando capas…</div>
       <div class="inspector" id="insp" hidden></div>
+      <div class="edbar" id="msBar" hidden><div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><b>Medir</b><label class="note" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="msSnap" checked> Imán</label></div>
+        <div class="tools"><button class="btn sm" type="button" data-ms="dist">Distancia</button><button class="btn sm" type="button" data-ms="perp">Perpendicular</button><button class="btn sm" type="button" data-ms="ancho">Ancho de calle</button><button class="btn sm" type="button" data-ms="area">Superficie</button></div>
+        <div class="note" id="msHint"></div><div id="msRes" style="font-size:13px"></div>
+        <div class="tools"><button class="btn sm primary" type="button" id="msFin">Terminar</button><button class="btn sm" type="button" id="msNote">Guardar como nota</button><button class="btn sm" type="button" id="msClr">Borrar mediciones</button><span style="flex:1"></span><button class="btn sm" type="button" id="msClose">Cerrar</button></div></div>
       <div class="edbar" id="edBar" hidden><div style="display:flex;justify-content:space-between;gap:8px"><b id="edTitle"></b><span class="note" id="edHint"></span></div>
         <div class="tools"><button class="btn sm" type="button" data-mode="edit">Mover vértices</button><button class="btn sm" type="button" data-mode="append">Extender</button><button class="btn sm" type="button" data-mode="draw">Dibujar tramo nuevo</button><button class="btn sm" type="button" id="edDel">Borrar vértice</button>
         <label class="note" style="display:flex;gap:4px;align-items:center"><input type="checkbox" id="edSnap" checked> Imán</label><span style="flex:1"></span><button class="btn sm primary" type="button" id="edSave">Guardar</button><button class="btn sm" type="button" id="edCancel">Cancelar</button></div></div>
@@ -429,6 +434,7 @@ function render(){
   if(st.selKind==="tr"&&st.sel){const r=st.trById[st.sel];if(r&&r.parts.length){ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.setLineDash([10,5]);ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);
     const a=r.parts[0],z=r.parts[r.parts.length-1];for(const [x,y] of [[a[0],a[1]],[z[z.length-2],z[z.length-1]]]){ctx.beginPath();ctx.arc(t.cx+x*s,t.cy-y*s,4.5,0,7);ctx.fillStyle=C.sel;ctx.fill()}}}
   if(ED.on){ctx.strokeStyle=C.accent;ctx.lineWidth=3.5;ctx.beginPath();for(const p of ED.parts){if(!p.length)continue;ctx.moveTo(t.cx+p[0][0]*s,t.cy-p[0][1]*s);for(let i=1;i<p.length;i++)ctx.lineTo(t.cx+p[i][0]*s,t.cy-p[i][1]*s)}ctx.stroke()}
+  msRender(ctx,t,s);
   if(st.ly.notas)for(const n of Object.values(st.notes||{})){if(!n||!n.pt||n.estado==="Resuelta")continue;const px=t.cx+n.pt[0]*s,py=t.cy-n.pt[1]*s;ctx.beginPath();ctx.moveTo(px,py-11);ctx.lineTo(px+7,py-4);ctx.lineTo(px,py+3);ctx.lineTo(px-7,py-4);ctx.closePath();ctx.fillStyle="#f2b705";ctx.fill();ctx.strokeStyle="#5a4300";ctx.lineWidth=1.5;ctx.stroke()}
   if(st.mark){ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,7,0,7);ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.stroke();ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,2,0,7);ctx.fillStyle=C.sel;ctx.fill()}
   labels(t,bb);
@@ -450,7 +456,7 @@ function dParts(parts,x,y){let m=1e12;for(const p of parts)for(let i=2;i<p.lengt
 function inRing(r,x,y){let c=false;for(let i=0,j=r.length-2;i<r.length;j=i,i+=2){const xi=r[i],yi=r[i+1],xj=r[j],yj=r[j+1];if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))c=!c}return c}
 const mapEl=$("#map");
 map.on("mousemove",e=>{const p=fromLL(e.latlng.lat,e.latlng.lng);if(p)$("#coords").textContent=`PG07  X ${p[0].toFixed(2)}  Y ${p[1].toFixed(2)}`});
-map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol=9/t.s;if(ED.on){edMapClick(x,y);return}const bb=[x-tol,y-tol,x+tol,y+tol];
+map.on("click",e=>{if(!D.ready)return;const P=Pm(e.latlng),x=P.x,y=P.y,t=T(),tol=9/t.s;if(ED.on){edMapClick(x,y);return}if(MS.on){msClick(x,y);return}const bb=[x-tol,y-tol,x+tol,y+tol];
   let best=null,bd=tol;stamp++;
   query(D.lG,D.l,bb,stamp,(f,i)=>{if(!l07Vis(f))return;const d=dParts(f.parts,x,y);if(d<bd){bd=d;best={k:"l",i}}});
   if(!best&&st.ly.tr){for(const r of st.tr){if(!r.parts.length||!trObsOk(r))continue;const d=dParts(r.parts,x,y);const lim=Math.max(tol,(r.halfw||15));if(d<lim&&d<(best?.d??1e9))best={k:"tr",id:r.id,d}}}
@@ -461,7 +467,7 @@ function linksFor(x,y){const ll=U(x,y),la=ll.lat.toFixed(6),lo=ll.lng.toFixed(6)
   return `<div class="mono" style="margin-top:6px">${pg?`X ${pg[0].toFixed(2)} · Y ${pg[1].toFixed(2)} (CABA-PG07)<br>`:""}${la}, ${lo} (WGS84)</div><div class="links"><a href="https://www.google.com/maps?q=${la},${lo}" target="_blank" rel="noopener">Google Maps</a><a href="https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${la},${lo}" target="_blank" rel="noopener">Street View</a><a href="https://www.openstreetmap.org/?mlat=${la}&mlon=${lo}#map=18/${la}/${lo}" target="_blank" rel="noopener">OpenStreetMap</a></div>`}
 function inspect(h,x,y){const el=$("#insp");let html="";
   if(h&&h.k==="l"){const f=D.l[h.i];const trs=st.fid2tr[f.fid]||[],srs=st.fid2sr[f.fid]||[];const A=f.A||{};
-    html=`<h3><span>${esc(f.tipo||"(sin tipo)")}${f.baja?' <span class="chip k-bad">dada de baja</span>':""}${f.nueva?' <span class="chip k-info">nueva</span>':""}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(A.SMP||"—")}</dd><dt>Sección · Mz · Parc.</dt><dd class="mono">${esc(A.SECCION||"—")} · ${esc(A.MANZANA||"—")} · ${esc(A.PARCELA||"—")}</dd><dt>OBS</dt><dd>${esc(A.OBS||"—")}</dd><dt>Plano</dt><dd>${esc(A.PLANO||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(A.NRO_ORD||"—")}</dd><dt>TEXTO</dt><dd>${esc(A.TEXTO||"—")}</dd><dt>FID lineas07</dt><dd class="mono">${f.nueva?"nueva":f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd>${f.edit?`<dt>Última edición</dt><dd>${esc(f.edit.por||"")} · ${fmtD(f.edit.fecha)}</dd>`:""}</dl>
+    html=`<h3><span>${esc(f.tipo||"(sin tipo)")}${f.baja?' <span class="chip k-bad">dada de baja</span>':""}${f.nueva?' <span class="chip k-info">nueva</span>':""}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(A.SMP||"—")}</dd><dt>Sección · Mz · Parc.</dt><dd class="mono">${esc(A.SECCION||"—")} · ${esc(A.MANZANA||"—")} · ${esc(A.PARCELA||"—")}</dd><dt>OBS</dt><dd>${esc(A.OBS||"—")}</dd><dt>Plano</dt><dd>${esc(A.PLANO||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(A.NRO_ORD||"—")}</dd><dt>TEXTO</dt><dd>${esc(A.TEXTO||"—")}</dd><dt>Largo</dt><dd>${lenFmt(f)}</dd><dt>FID lineas07</dt><dd class="mono">${f.nueva?"nueva":f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd>${f.edit?`<dt>Última edición</dt><dd>${esc(f.edit.por||"")} · ${fmtD(f.edit.fecha)}</dd>`:""}</dl>
     <div class="lbtns"><button class="btn sm" type="button" data-act="nota" data-i="${h.i}">+ Nota</button><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button>${f.nueva?`<button class="btn sm" type="button" data-act="del" data-i="${h.i}" title="Borra por completo esta línea nueva">Eliminar línea</button>`:`<button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}" title="Queda marcada para dar de baja en lineas07">${f.baja?"Reincorporar":"Dar de baja"}</button>`}</div>`;
     st.hl=new Set([h.i]);}
   else if(h&&h.k==="tr"){const r=st.trById[h.id];select("tr",r.id,false);html=`<h3><span>${esc(r.id)} · ${esc(r.calle)}</span><button class="x" aria-label="Cerrar">×</button></h3><div>${esc(r.desde)} – ${esc(r.hasta)}</div><div style="margin-top:4px"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span></div>`}
@@ -778,7 +784,7 @@ function afterEdit(){applyEdits();refreshAfterRev();if(cfg.token&&cfg.owner&&cfg
 
 /* ---------- editor de geometría ---------- */
 const ED={on:false};
-function startEdit(kind,id,opts={}){if(ED.on)stopEdit();
+function startEdit(kind,id,opts={}){if(ED.on)stopEdit();if(MS.on)msClose();
   let parts=[];if(kind==="tr"){const r=st.trById[id];parts=r.parts||[]}else if(kind==="l"){const f=D.l[D.lByFid.get(id)];parts=f?f.parts:[]}
   Object.assign(ED,{on:true,kind,id,opts,sel:null,snap:ED.snap!==false,parts:parts.map(p=>{const o=[];for(let i=0;i<p.length;i+=2)o.push([p[i],p[i+1]]);return o})});
   ED.mode=ED.parts.length&&!opts.redraw?"edit":"draw";if(ED.mode==="draw")ED.parts=[[]];
@@ -973,6 +979,103 @@ $("#noCsv").onclick=()=>{const q=v=>{v=String(v??"");return /[;"\n]/.test(v)?'"'
   const rows=[["Tipo","Estado","Nota","Para","Vinculada a","X PG07","Y PG07","Creada por","Fecha","Resolución","Resuelta por","Fecha resolución"]];
   for(const n of Object.values(st.notes).sort((a,b)=>(a.creado||"").localeCompare(b.creado||""))){const [x,y]=ll(n.pt);rows.push([n.tipo,n.estado,n.texto,n.para,refLabel(n.ref),x,y,n.creadoPor,fmtD(n.creado),n.resp,n.resueltaPor,fmtD(n.resuelta)])}
   downloadFile("notas_visor_lineas07.csv","﻿"+rows.map(r=>r.map(q).join(";")).join("\r\n"),"text/csv;charset=utf-8")};
+/* ---------- herramientas de medición ---------- */
+const MS={on:false,tool:"dist",items:[],cur:null,hover:null,ref:null};
+const fmtN=(v,d=2)=>Number(v).toLocaleString("es-AR",{minimumFractionDigits:d,maximumFractionDigits:d});
+function dPG(a,b){const p=m2pg(a[0],a[1]),q=m2pg(b[0],b[1]);return Math.hypot(p[0]-q[0],p[1]-q[1])}
+function lenPG(parts){let s=0;for(const p of parts){let prev=null;for(let i=0;i<p.length;i+=2){const q=m2pg(p[i],p[i+1]);if(prev)s+=Math.hypot(q[0]-prev[0],q[1]-prev[1]);prev=q}}return s}
+function nearSeg(px,py,ax,ay,bx,by){const dx=bx-ax,dy=by-ay,l=dx*dx+dy*dy;let u=l?((px-ax)*dx+(py-ay)*dy)/l:0;u=u<0?0:u>1?1:u;const x=ax+u*dx,y=ay+u*dy;return [x,y,Math.hypot(px-x,py-y),u]}
+function ringsOf(f){const out=[];for(const poly of f.polys)for(const r of poly){const c=Array.from(r);if(c[0]!==c[c.length-2]||c[1]!==c[c.length-1])c.push(c[0],c[1]);out.push(c)}return out}
+function lFeatLabel(f){return `${f.A&&f.A.TIPO||f.tipo||"lineas07"}${f.A&&f.A.SMP?" (SMP "+f.A.SMP+")":""}`}
+/* candidatos: líneas de lineas07 visibles, ejes y frentes de manzana */
+function eachCand(bb,cb){
+  stamp++;query(D.lG,D.l,bb,stamp,f=>{if(l07Vis(f)&&!f.baja)cb(f.parts,"l",lFeatLabel(f))});
+  if(st.ly.ejes){stamp++;query(D.ejG,D.ej,bb,stamp,f=>cb(f.parts,"e","eje "+(f.name||"")))}
+  if(st.ly.mz){stamp++;query(D.mzG,D.mz,bb,stamp,f=>cb(ringsOf(f),"m","frente de manzana "+(f.sm||"")))}}
+function msSnap(x,y){if(!$("#msSnap").checked)return {p:[x,y]};const t=T(),tol=10/t.s,bb=[x-tol,y-tol,x+tol,y+tol];let best=null,bd=tol;
+  eachCand(bb,(parts,k,lab)=>{for(const p of parts)for(let i=0;i<p.length;i+=2){const d=Math.hypot(p[i]-x,p[i+1]-y);if(d<bd){bd=d;best={p:[p[i],p[i+1]],lab:"vértice de "+lab}}}});
+  if(best)return best;bd=tol*0.7;
+  eachCand(bb,(parts,k,lab)=>{for(const p of parts)for(let i=2;i<p.length;i+=2){const r=nearSeg(x,y,p[i-2],p[i-1],p[i],p[i+1]);if(r[2]<bd){bd=r[2];best={p:[r[0],r[1]],lab:lab}}}});
+  return best||{p:[x,y]}}
+function pickLine(x,y){const t=T(),tol=10/t.s,bb=[x-tol,y-tol,x+tol,y+tol];let best=null,bd=tol;
+  eachCand(bb,(parts,k,lab)=>{for(const p of parts)for(let i=2;i<p.length;i+=2){const r=nearSeg(x,y,p[i-2],p[i-1],p[i],p[i+1]);if(r[2]<bd){bd=r[2];best={parts,k,lab,p:[r[0],r[1]]}}}});return best}
+function nearestOn(parts,x,y){let b=null;for(const p of parts)for(let i=2;i<p.length;i+=2){const r=nearSeg(x,y,p[i-2],p[i-1],p[i],p[i+1]);if(!b||r[2]<b[2])b=r}return b}
+function segX(a,b,c,d){const r=[b[0]-a[0],b[1]-a[1]],s=[d[0]-c[0],d[1]-c[1]],den=r[0]*s[1]-r[1]*s[0];if(Math.abs(den)<1e-12)return null;const qp=[c[0]-a[0],c[1]-a[1]],t=(qp[0]*s[1]-qp[1]*s[0])/den,u=(qp[0]*r[1]-qp[1]*r[0])/den;return t>=0&&t<=1&&u>=0&&u<=1?t:null}
+const HINT={dist:"Clic para agregar puntos (con imán). Doble clic o «Terminar» para cerrar la medición. Retroceso borra el último punto.",
+  perp:"1) Clic sobre la línea de referencia (lineas07, eje o frente de manzana). 2) Clic sobre otra línea o en un punto: mide la distancia perpendicular. Podés seguir haciendo clic para medir en otros lugares.",
+  ancho:"Clic en medio de la calzada: mide el ancho entre los frentes de manzana (líneas oficiales) y la distancia a las líneas de lineas07 y al eje que cruza.",
+  area:"Clic para marcar los vértices del polígono (con imán). Doble clic o «Terminar» para cerrar."};
+function msOpen(){if(ED.on){say("Terminá o cancelá la edición antes de medir.");return}MS.on=true;$("#msBar").hidden=false;$("#insp").hidden=true;map.doubleClickZoom.disable();mapEl.classList.add("crosshair");msTool(MS.tool)}
+function msClose(){MS.on=false;MS.cur=null;MS.hover=null;MS.ref=null;$("#msBar").hidden=true;map.doubleClickZoom.enable();mapEl.classList.remove("crosshair");draw()}
+function msTool(k){MS.tool=k;MS.cur=null;MS.ref=null;for(const b of document.querySelectorAll("#msBar [data-ms]"))b.setAttribute("aria-pressed",String(b.dataset.ms===k));$("#msHint").textContent=HINT[k];$("#msFin").hidden=!(k==="dist"||k==="area");msRes();draw()}
+function msSummary(it){if(!it)return"";
+  if(it.type==="dist")return `Distancia: ${fmtN(it.total)} m`+(it.segs.length>1?` (${it.segs.length} tramos: ${it.segs.map(v=>fmtN(v)).join(" + ")})`:"");
+  if(it.type==="area")return `Superficie: ${fmtN(it.area)} m² · perímetro ${fmtN(it.per)} m`;
+  if(it.type==="perp")return `Distancia perpendicular: ${fmtN(it.d)} m — desde ${it.tgt} hasta ${it.ref}`;
+  if(it.type==="ancho")return `Ancho entre líneas oficiales (${it.mz} / ${it.mzB}): ${fmtN(it.d)} m`+(it.cuts.length?". Desde la L.O. más cercana: "+it.cuts.map(c=>`${c.lab} a ${fmtN(c.d)} m ${c.dn}`).join("; "):"");return""}
+function msRes(){const last=MS.items[MS.items.length-1];let h="";
+  if(MS.cur&&(MS.cur.type==="dist"||MS.cur.type==="area")&&MS.cur.pts.length){const it=msCalc(MS.cur,true);h=`<b>En curso:</b> ${esc(msSummary(it))}`}
+  else if(MS.tool==="perp"&&MS.ref)h=`<b>Referencia:</b> ${esc(MS.ref.lab)}. Ahora hacé clic en otra línea o punto.`;
+  if(last)h+=(h?"<br>":"")+`<b>Última:</b> ${esc(msSummary(last))}`;
+  $("#msRes").innerHTML=h||'<span class="note">Sin mediciones todavía.</span>';$("#msNote").disabled=!last;$("#msClr").disabled=!MS.items.length&&!MS.cur}
+function msCalc(c,live){const pts=c.pts.slice();if(live&&MS.hover&&pts.length)pts.push(MS.hover);
+  if(c.type==="dist"){const segs=[];for(let i=1;i<pts.length;i++)segs.push(dPG(pts[i-1],pts[i]));return {type:"dist",pts,segs,total:segs.reduce((a,b)=>a+b,0)}}
+  const P=pts.map(p=>m2pg(p[0],p[1]));let a=0,per=0;for(let i=0;i<P.length;i++){const j=(i+1)%P.length;a+=P[i][0]*P[j][1]-P[j][0]*P[i][1];if(P.length>1)per+=Math.hypot(P[j][0]-P[i][0],P[j][1]-P[i][1])}
+  return {type:"area",pts,area:Math.abs(a)/2,per}}
+function msFinish(){const c=MS.cur;if(!c)return;const pts=c.pts.filter((p,i,a)=>i===0||Math.hypot(p[0]-a[i-1][0],p[1]-a[i-1][1])>1e-6);c.pts=pts;
+  if((c.type==="dist"&&pts.length>=2)||(c.type==="area"&&pts.length>=3))MS.items.push(msCalc(c,false));MS.cur=null;msRes();draw()}
+function msClick(x,y){const k=MS.tool;
+  if(k==="dist"||k==="area"){const s=msSnap(x,y);if(!MS.cur||MS.cur.type!==k)MS.cur={type:k,pts:[]};MS.cur.pts.push(s.p);msRes();draw();return}
+  if(k==="perp"){if(!MS.ref){const L0=pickLine(x,y);if(!L0){say("Hacé clic sobre una línea de lineas07, un eje o un frente de manzana.");return}MS.ref=L0;msRes();draw();return}
+    const L1=pickLine(x,y);let P=[x,y],tgt="punto marcado";if(L1&&L1.parts!==MS.ref.parts){P=L1.p;tgt=L1.lab}else{const s=msSnap(x,y);P=s.p;if(s.lab)tgt=s.lab}
+    const r=nearestOn(MS.ref.parts,P[0],P[1]);if(!r)return;MS.items.push({type:"perp",a:[r[0],r[1]],b:P,d:dPG([r[0],r[1]],P),ref:MS.ref.lab,tgt,oblique:r[3]<=0||r[3]>=1});msRes();draw();return}
+  if(k==="ancho"){const R=60/Math.cos(-34.6*Math.PI/180),bb=[x-R,y-R,x+R,y+R];let A=null;
+    stamp++;query(D.mzG,D.mz,bb,stamp,f=>{for(const r of ringsOf(f))for(let i=2;i<r.length;i+=2){const q=nearSeg(x,y,r[i-2],r[i-1],r[i],r[i+1]);if(!A||q[2]<A.d)A={p:[q[0],q[1]],d:q[2],u:q[3],dir:[r[i]-r[i-2],r[i+1]-r[i-1]],f}}});
+    if(!A){say("No encontré manzanas cerca de ese punto.");return}
+    if(A.d<1e-6){say("Hacé clic en la calzada, no sobre la línea oficial.");return}
+    let n=A.u<=0.001||A.u>=0.999?[x-A.p[0],y-A.p[1]]:[-A.dir[1],A.dir[0]];const ln=Math.hypot(n[0],n[1]);n=[n[0]/ln,n[1]/ln];if((x-A.p[0])*n[0]+(y-A.p[1])*n[1]<0)n=[-n[0],-n[1]];
+    const L2=200,E=[A.p[0]+n[0]*L2,A.p[1]+n[1]*L2],bb2=[Math.min(A.p[0],E[0])-1,Math.min(A.p[1],E[1])-1,Math.max(A.p[0],E[0])+1,Math.max(A.p[1],E[1])+1];let tB=null;
+    let mzB="";stamp++;query(D.mzG,D.mz,bb2,stamp,f=>{for(const r of ringsOf(f))for(let i=2;i<r.length;i+=2){const t=segX(A.p,E,[r[i-2],r[i-1]],[r[i],r[i+1]]);if(t!==null&&t*L2>0.3&&(tB===null||t<tB)){tB=t;mzB=f.sm}}});
+    if(tB===null){say("No encontré el frente de manzana de enfrente (puede ser una plaza, vía o borde de la Ciudad).");return}
+    const B=[A.p[0]+(E[0]-A.p[0])*tB,A.p[1]+(E[1]-A.p[1])*tB],cuts=[],EXT=45,P0=[A.p[0]-n[0]*EXT,A.p[1]-n[1]*EXT],P1=[B[0]+n[0]*EXT,B[1]+n[1]*EXT],LAB=Math.hypot(B[0]-A.p[0],B[1]-A.p[1]);
+    const add=(parts,lab,eje)=>{for(const p of parts)for(let i=2;i<p.length;i+=2){const t=segX(P0,P1,[p[i-2],p[i-1]],[p[i],p[i+1]]);if(t===null)continue;const q=[P0[0]+(P1[0]-P0[0])*t,P0[1]+(P1[1]-P0[1])*t],along=t*(LAB+2*EXT)-EXT;
+      if(eje&&(along<0||along>LAB))continue;
+      const w=along<0?{d:dPG(A.p,q),dn:"dentro de la manzana "+A.f.sm}:along>LAB?{d:dPG(B,q),dn:"dentro de la manzana "+mzB}:{d:Math.min(dPG(A.p,q),dPG(B,q)),dn:"en la calzada"};
+      cuts.push(Object.assign({p:q,lab,along},w))}};
+    const bb3=[Math.min(P0[0],P1[0]),Math.min(P0[1],P1[1]),Math.max(P0[0],P1[0]),Math.max(P0[1],P1[1])];
+    stamp++;query(D.lG,D.l,bb3,stamp,f=>{if(l07Vis(f)&&!f.baja)add(f.parts,lFeatLabel(f),false)});stamp++;query(D.ejG,D.ej,bb3,stamp,f=>add(f.parts,"eje "+(f.name||""),true));
+    cuts.sort((a,b)=>a.along-b.along);MS.items.push({type:"ancho",a:A.p,b:B,d:dPG(A.p,B),cuts,mz:A.f.sm,mzB,p0:cuts.length&&cuts[0].along<0?cuts[0].p:null,p1:cuts.length&&cuts[cuts.length-1].along>LAB?cuts[cuts.length-1].p:null});msRes();draw()}}
+map.on("dblclick",e=>{if(MS.on&&(MS.tool==="dist"||MS.tool==="area")){L.DomEvent.stop(e);msFinish()}});
+map.on("mousemove",e=>{if(!MS.on||!(MS.cur&&MS.cur.pts&&MS.cur.pts.length))return;const P=Pm(e.latlng);MS.hover=msSnap(P.x,P.y).p;msRes();draw()});
+function msLabel(ctx,txt,px,py){ctx.font="600 12px system-ui,sans-serif";const w=ctx.measureText(txt).width+10;ctx.fillStyle="rgba(255,255,255,.93)";ctx.strokeStyle="#9c2b00";ctx.lineWidth=1;ctx.beginPath();ctx.rect(px-w/2,py-10,w,20);ctx.fill();ctx.stroke();ctx.fillStyle="#7a2200";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(txt,px,py);ctx.textAlign="start";ctx.textBaseline="alphabetic"}
+function msRender(ctx,t,s){if(!MS.items.length&&!MS.cur&&!MS.ref)return;const X=p=>t.cx+p[0]*s,Y=p=>t.cy-p[1]*s,col="#d9480f";
+  const line=(pts,close,dash)=>{ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(X(p),Y(p)):ctx.moveTo(X(p),Y(p)));if(close)ctx.closePath();ctx.setLineDash(dash||[]);ctx.strokeStyle="#fff";ctx.lineWidth=5;ctx.stroke();ctx.strokeStyle=col;ctx.lineWidth=2.2;ctx.stroke();ctx.setLineDash([])};
+  const dot=p=>{ctx.beginPath();ctx.arc(X(p),Y(p),3.5,0,7);ctx.fillStyle="#fff";ctx.fill();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.stroke()};
+  const mid=(a,b)=>[(X(a)+X(b))/2,(Y(a)+Y(b))/2];
+  if(MS.ref){ctx.strokeStyle="rgba(217,72,15,.45)";ctx.lineWidth=9;ctx.beginPath();for(const p of MS.ref.parts)pathLine(p,t);ctx.stroke()}
+  const items=MS.items.slice();if(MS.cur&&MS.cur.pts.length)items.push(Object.assign(msCalc(MS.cur,true),{live:true}));
+  for(const it of items){
+    if(it.type==="dist"){line(it.pts,false,it.live?[6,4]:null);it.pts.forEach(dot);it.segs.forEach((v,i)=>{if(it.segs.length>1){const m=mid(it.pts[i],it.pts[i+1]);msLabel(ctx,fmtN(v)+" m",m[0],m[1]-14)}});const e=it.pts[it.pts.length-1];if(it.pts.length>1)msLabel(ctx,(it.segs.length>1?"Total ":"")+fmtN(it.total)+" m",X(e)+0,Y(e)-22)}
+    else if(it.type==="area"){if(it.pts.length>2){ctx.beginPath();it.pts.forEach((p,i)=>i?ctx.lineTo(X(p),Y(p)):ctx.moveTo(X(p),Y(p)));ctx.closePath();ctx.fillStyle="rgba(217,72,15,.15)";ctx.fill()}line(it.pts,it.pts.length>2,it.live?[6,4]:null);it.pts.forEach(dot);
+      if(it.pts.length>2){let cx=0,cy=0;it.pts.forEach(p=>{cx+=X(p);cy+=Y(p)});msLabel(ctx,fmtN(it.area)+" m²",cx/it.pts.length,cy/it.pts.length)}}
+    else if(it.type==="perp"){line([it.a,it.b]);dot(it.a);dot(it.b);const m=mid(it.a,it.b);msLabel(ctx,fmtN(it.d)+" m",m[0],m[1]);
+      if(!it.oblique){const dx=X(it.b)-X(it.a),dy=Y(it.b)-Y(it.a),l=Math.hypot(dx,dy)||1,ux=dx/l*8,uy=dy/l*8;ctx.strokeStyle=col;ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(X(it.a)+uy,Y(it.a)-ux);ctx.lineTo(X(it.a)+uy+ux,Y(it.a)-ux+uy);ctx.lineTo(X(it.a)+ux,Y(it.a)+uy);ctx.stroke()}}
+    else if(it.type==="ancho"){if(it.p0)line([it.p0,it.a],false,[4,4]);if(it.p1)line([it.b,it.p1],false,[4,4]);line([it.a,it.b]);dot(it.a);dot(it.b);const m=mid(it.a,it.b);msLabel(ctx,"Ancho "+fmtN(it.d)+" m",m[0]+0,m[1]-16);
+      for(const c of it.cuts){ctx.beginPath();ctx.arc(X(c.p),Y(c.p),4,0,7);ctx.fillStyle=col;ctx.fill()}}}}
+function lenFmt(f){try{return fmtN(lenPG(f.parts))+" m"}catch(e){return"—"}}
+$("#msBar").addEventListener("click",e=>{const b=e.target.closest("button");if(!b)return;
+  if(b.dataset.ms)msTool(b.dataset.ms);else if(b.id==="msFin")msFinish();else if(b.id==="msClose")msClose();
+  else if(b.id==="msClr"){MS.items=[];MS.cur=null;MS.ref=null;msRes();draw()}
+  else if(b.id==="msNote"){const it=MS.items[MS.items.length-1];if(!it)return;const pts=it.pts||[it.a,it.b];const c=pts.reduce((a,p)=>[a[0]+p[0]/pts.length,a[1]+p[1]/pts.length],[0,0]);
+    const pg=pts.map(p=>m2pg(p[0],p[1])).map(q=>`(${fmtN(q[0])}; ${fmtN(q[1])})`);
+    newNoteFor(null,c);$("#noTxt").value=`Medición — ${msSummary(it)}.\nPuntos CABA-PG07: ${pg.join(" → ")}`;$("#noTipo").value="Estudiar"}});
+document.addEventListener("keydown",e=>{if(!MS.on||/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName))return;
+  if(e.key==="Enter"){e.preventDefault();msFinish()}else if(e.key==="Escape"){if(MS.cur||MS.ref){MS.cur=null;MS.ref=null;msRes();draw()}else msClose()}
+  else if(e.key==="Backspace"&&MS.cur&&MS.cur.pts.length){e.preventDefault();MS.cur.pts.pop();if(!MS.cur.pts.length)MS.cur=null;msRes();draw()}});
+const MeasCtl=L.Control.extend({onAdd(){const d=L.DomUtil.create("div","leaflet-bar");const a=L.DomUtil.create("a","",d);a.href="#";a.title="Herramientas de medición";a.setAttribute("role","button");a.setAttribute("aria-label","Medir");
+  a.innerHTML='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle"><path d="M3 17 17 3l4 4L7 21z"/><path d="m7 13 2 2m1-5 2 2m1-5 2 2"/></svg>';
+  L.DomEvent.on(a,"click",ev=>{L.DomEvent.preventDefault(ev);MS.on?msClose():msOpen()});L.DomEvent.disableClickPropagation(d);return d}});
+new MeasCtl({position:"topright"}).addTo(map);
 /* ---------- base map selector ---------- */
 $("#lgBase").innerHTML=BASES.map(([k,n])=>`<label><input type="radio" name="base" value="${k}"> ${esc(n)}</label>`).join("");
 $("#lgBase").addEventListener("change",e=>{if(e.target.name==="base")setBase(e.target.value)});
