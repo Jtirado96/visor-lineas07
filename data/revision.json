@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T19:26:55.879Z",
+ "actualizado": "2026-10-29T19:27:26.084Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -30,13 +30,22 @@
   },
   "CUR-130": {
    "resultado": "Correcto",
-   "obs": "Esta dibujado la linea particularizada como indica cur.",
+   "obs": "Linea07 dibujada sobre la parte de manzana que no tiene apertura de calle.",
    "norma": "",
    "link": "",
    "por": "Junior",
-   "fecha": "2026-10-20T19:36:06.581Z",
+   "fecha": "2026-10-29T19:27:25.641Z",
    "kind": "tr",
-   "hist": []
+   "hist": [
+    {
+     "resultado": "Correcto",
+     "obs": "Esta dibujado la linea particularizada como indica cur.",
+     "norma": "",
+     "link": "",
+     "por": "Junior",
+     "fecha": "2026-10-20T19:36:06.581Z"
+    }
+   ]
   },
   "CUR-074": {
    "resultado": "Correcto",
