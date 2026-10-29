@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T16:29:32.374Z",
+ "actualizado": "2026-10-29T16:30:42.012Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -104,6 +104,16 @@
      "fecha": "2026-10-22T21:37:10.127Z"
     }
    ]
+  },
+  "CUR-028": {
+   "resultado": "Correcto",
+   "obs": "El trazado de linea07 se encuentra realizado sobre las calles existentes, no llega hasta Av. Warnes.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T16:30:41.476Z",
+   "kind": "tr",
+   "hist": []
   }
  },
  "lineas": {},
