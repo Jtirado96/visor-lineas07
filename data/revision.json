@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T20:57:54.414Z",
+ "actualizado": "2026-10-29T21:03:25.543Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -1618,6 +1618,24 @@
    "creadoPor": "Junior",
    "por": "Junior",
    "fecha": "2026-10-29T20:57:53.869Z"
+  },
+  "Nmvu15y4r": {
+   "texto": "Consultar por que no aparece en ningún cuadro s/cur. Por Ord. 34778 22/02/79, existia afectacción a Av. Mariano Acosta de Av. Rivadavia a Av. Francisco de la Cruz incluida en el listado 6.1.2. Vías con linea municipal de Edificación Particularizada del C.P. Urbano BM 15977. Por lo visto se derogó.",
+   "tipo": "Preguntar",
+   "para": "",
+   "estado": "Pendiente",
+   "ref": {
+    "kind": "l",
+    "id": 988
+   },
+   "pt": [
+    -6506400.5,
+    -4117909.6
+   ],
+   "creado": "2026-10-29T21:03:24.939Z",
+   "creadoPor": "Junior",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:03:24.939Z"
   }
  }
 }
