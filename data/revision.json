@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:21:45.348Z",
+ "actualizado": "2026-10-29T21:23:35.273Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -443,6 +443,16 @@
      "fecha": "2026-10-29T21:14:48.295Z"
     }
    ]
+  },
+  "CUR-037": {
+   "resultado": "Correcto",
+   "obs": "S/CUR debe de tener un ancho total de 10.5m. pero en la realidad  tiene alrededor de 40m.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:23:34.404Z",
+   "kind": "tr",
+   "hist": []
   }
  },
  "lineas": {},
