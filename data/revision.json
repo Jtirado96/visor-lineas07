@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:30:21.021Z",
+ "actualizado": "2026-10-29T21:32:10.722Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -1917,6 +1917,24 @@
    "creadoPor": "Junior",
    "por": "Junior",
    "fecha": "2026-10-29T21:24:11.013Z"
+  },
+  "Nmvu26x6h": {
+   "texto": "No tiene traza linea07, pero se ve materializada la calle.",
+   "tipo": "Preguntar",
+   "para": "",
+   "estado": "Pendiente",
+   "ref": {
+    "kind": "tr",
+    "id": "CUR-055"
+   },
+   "pt": [
+    -6502175.7,
+    -4116337.1
+   ],
+   "creado": "2026-10-29T21:32:09.977Z",
+   "creadoPor": "Junior",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:32:09.977Z"
   }
  }
 }
