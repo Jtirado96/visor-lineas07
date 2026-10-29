@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:23:35.273Z",
+ "actualizado": "2026-10-29T21:24:11.579Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -1784,6 +1784,24 @@
    "creadoPor": "Junior",
    "por": "Junior",
    "fecha": "2026-10-29T21:03:24.939Z"
+  },
+  "Nmvu1wnlx": {
+   "texto": "No tiene traza linea07, pero cumple de por más el ancho de calle s/cur de 10.5m.",
+   "tipo": "Preguntar",
+   "para": "",
+   "estado": "Pendiente",
+   "ref": {
+    "kind": "tr",
+    "id": "CUR-037"
+   },
+   "pt": [
+    -6508434.5,
+    -4118802
+   ],
+   "creado": "2026-10-29T21:24:11.013Z",
+   "creadoPor": "Junior",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:24:11.013Z"
   }
  }
 }
