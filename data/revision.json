@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:37:07.680Z",
+ "actualizado": "2026-10-29T21:37:17.878Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -482,6 +482,16 @@
      "fecha": "2026-10-29T21:33:06.817Z"
     }
    ]
+  },
+  "CUR-067": {
+   "resultado": "Correcto",
+   "obs": "Apertura de calle materializada.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:37:17.183Z",
+   "kind": "tr",
+   "hist": []
   }
  },
  "lineas": {},
