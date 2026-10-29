@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:33:07.318Z",
+ "actualizado": "2026-10-29T21:33:21.087Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -470,9 +470,18 @@
    "norma": "",
    "link": "",
    "por": "Junior",
-   "fecha": "2026-10-29T21:33:06.817Z",
+   "fecha": "2026-10-29T21:33:20.625Z",
    "kind": "tr",
-   "hist": []
+   "hist": [
+    {
+     "resultado": "Correcto",
+     "obs": "Apertura de calle materializada.",
+     "norma": "",
+     "link": "",
+     "por": "Junior",
+     "fecha": "2026-10-29T21:33:06.817Z"
+    }
+   ]
   }
  },
  "lineas": {},
