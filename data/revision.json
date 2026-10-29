@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T21:14:35.563Z",
+ "actualizado": "2026-10-29T21:14:48.748Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -424,6 +424,16 @@
      "fecha": "2026-10-29T21:14:21.615Z"
     }
    ]
+  },
+  "CUR-050": {
+   "resultado": "Falta cargar en lineas07",
+   "obs": "No hay traza de linea07, en CUR s/ DEC 17.526/51.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-10-29T21:14:48.295Z",
+   "kind": "tr",
+   "hist": []
   }
  },
  "lineas": {},
