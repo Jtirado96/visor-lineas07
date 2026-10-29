@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T16:48:18.086Z",
+ "actualizado": "2026-10-29T16:48:38.258Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -469,8 +469,13 @@
     ]
    ],
    "por": "Junior",
-   "fecha": "2026-10-29T16:48:16.967Z",
+   "fecha": "2026-10-29T16:48:37.343Z",
    "hist": [
+    {
+     "accion": "Estado manual: Completa",
+     "por": "Junior",
+     "fecha": "2026-10-29T16:48:37.343Z"
+    },
     {
      "accion": "Trazado editado",
      "por": "Junior",
@@ -486,7 +491,8 @@
      "por": "Junior",
      "fecha": "2026-10-29T16:45:04.465Z"
     }
-   ]
+   ],
+   "estado_manual": "Completa"
   }
  }
 }
