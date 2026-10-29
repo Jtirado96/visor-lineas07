@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-10-29T17:12:33.270Z",
+ "actualizado": "2026-10-29T17:12:37.882Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -160,9 +160,18 @@
    "norma": "",
    "link": "",
    "por": "Junior",
-   "fecha": "2026-10-29T17:12:32.815Z",
+   "fecha": "2026-10-29T17:12:37.430Z",
    "kind": "tr",
-   "hist": []
+   "hist": [
+    {
+     "resultado": "Falta cargar en lineas07",
+     "obs": "Faltan dibujar lineas07 en algunas manzanas.",
+     "norma": "",
+     "link": "",
+     "por": "Junior",
+     "fecha": "2026-10-29T17:12:32.815Z"
+    }
+   ]
   }
  },
  "lineas": {},
