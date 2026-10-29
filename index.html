@@ -55,7 +55,8 @@ main{display:grid;grid-template-columns:minmax(340px,440px) 1fr;min-height:0}
 .panel{background:var(--panel);border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0;min-width:0}
 @media (max-width:820px){.panel{order:2;border-right:0;border-top:1px solid var(--line)}}
 .tabs{display:flex;border-bottom:1px solid var(--line);padding-left:max(8px,env(safe-area-inset-left,0px))}
-.tabs button{flex:1;padding:9px 6px;border:0;background:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px}
+.tabs button span.mono{display:block;min-height:1.2em;font-size:12px}
+.tabs button{flex:1 1 0;min-width:0;white-space:nowrap;padding:8px 2px;letter-spacing:-.01em;border:0;background:none;border-bottom:2px solid transparent;cursor:pointer;color:var(--muted);font-weight:600;font-size:13px}
 .tabs button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
 .tabpane{flex:1;min-height:0;display:flex;flex-direction:column}
 .filters{display:flex;flex-wrap:wrap;gap:6px;padding:8px 12px;border-bottom:1px solid var(--line)}
@@ -124,6 +125,18 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
 .btn.sm{padding:3px 8px;font-size:12px}
 .obsbar{padding:8px 12px;background:var(--info-soft);color:var(--ink);font-size:12.5px;display:grid;gap:4px;border-bottom:1px solid var(--line)}
 .obsbar label{display:flex;gap:6px;align-items:center}
+.noteform{display:grid;gap:6px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.noteform textarea,.noteform input,.noteform select,.ncard textarea{padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--soft);font:inherit;min-width:0}
+.noteform textarea{resize:vertical}
+.chkl{display:flex;gap:6px;align-items:center}
+.ncard{padding:10px 12px;border-bottom:1px solid var(--line);display:grid;gap:5px}
+.ncard.res{opacity:.72}
+.ncard .ntx{white-space:pre-wrap;font-size:13.5px}
+.ncard .nmeta{font-size:11.5px;color:var(--muted)}
+.ncard .nres{font-size:12.5px;border-left:3px solid var(--ok,#2e7d4f);padding-left:8px;white-space:pre-wrap}
+.chip.k-nE{background:var(--info-soft);color:var(--info)}.chip.k-nP{background:var(--warn-soft,#fff1d6);color:var(--warn,#8a5a00)}.chip.k-nC{background:var(--bad-soft);color:var(--bad)}
+.notebox{margin-top:10px;padding:10px;border:1px dashed var(--line);border-radius:8px;display:grid;gap:6px}
+.notebox ul{margin:0;padding-left:18px;font-size:12.5px}
 .btn.danger{border-color:var(--bad);color:var(--bad)}
 .editbox{margin-top:10px;padding:10px;border:1px solid var(--line);border-radius:8px;display:grid;gap:8px}
 .editbox h4,.layers h4.x{margin:0;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
@@ -175,6 +188,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
         <button role="tab" id="tab-tr" aria-selected="true" data-tab="tr">Tramos CUR <span id="nTr" class="mono"></span></button>
         <button role="tab" id="tab-sr" aria-selected="false" data-tab="sr">Sin respaldo <span id="nSr" class="mono"></span></button>
         <button role="tab" id="tab-ed" aria-selected="false" data-tab="ed">Ediciones <span id="nEd" class="mono"></span></button>
+        <button role="tab" id="tab-no" aria-selected="false" data-tab="no">Notas <span id="nNo" class="mono"></span></button>
         <button role="tab" id="tab-ly" aria-selected="false" data-tab="ly">Capas</button>
       </div>
       <div id="roNote" class="ro" hidden></div>
@@ -207,6 +221,24 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
         </div>
         <div class="list" id="listEd"></div>
       </div>
+      <div class="tabpane" id="pane-no" hidden>
+        <form class="noteform" id="noteForm">
+          <label for="noTxt" class="note" style="font-weight:600">Nueva nota</label>
+          <textarea id="noTxt" rows="3" placeholder="Qué hay que estudiar o preguntar…" required></textarea>
+          <div class="act"><select id="noTipo" aria-label="Tipo de nota"><option>Estudiar</option><option>Preguntar</option><option>Corregir</option><option>Otro</option></select>
+            <input id="noPara" placeholder="Para / a quién (opcional)" aria-label="Para quién" style="flex:1;min-width:120px">
+            <button class="btn primary" type="submit">Agregar</button></div>
+          <label class="note chkl" id="noRefL" hidden><input type="checkbox" id="noRef" checked> <span id="noRefTxt"></span></label>
+          <label class="note chkl" id="noPtL" hidden><input type="checkbox" id="noPt" checked> Vincular al punto marcado en el mapa</label>
+        </form>
+        <div class="filters">
+          <select id="fNoEst" aria-label="Estado de la nota"><option value="Pendiente">Pendientes</option><option value="Resuelta">Resueltas</option><option value="">Todas</option></select>
+          <select id="fNoTipo" aria-label="Tipo de nota"><option value="">Todo tipo</option><option>Estudiar</option><option>Preguntar</option><option>Corregir</option><option>Otro</option></select>
+          <input id="fNoTxt" type="search" placeholder="Buscar en notas" aria-label="Buscar en notas">
+          <button class="btn sm" type="button" id="noCsv" title="Descargar las notas en CSV">CSV</button>
+        </div>
+        <div class="list" id="listNo"></div>
+      </div>
       <div class="tabpane" id="pane-ly" hidden>
         <div class="layers">
           <div>
@@ -233,6 +265,7 @@ dl.kv dt{color:var(--muted)} dl.kv dd{margin:0;min-width:0;overflow-wrap:anywher
           <div>
             <h4>Cartografía</h4>
             <div class="lg">
+              <label><input type="checkbox" id="lyNotas" checked><span class="swf" style="background:#f2b705;transform:rotate(45deg);width:9px;height:9px"></span> Notas pendientes con punto en el mapa</label>
               <label><input type="checkbox" id="lyEjes" checked><span class="sw" style="border-color:var(--avenue)"></span> Ejes de calle oficiales (nombres desde cerca)</label>
               <label><input type="checkbox" id="lyMz" checked><span class="swf" style="background:var(--block)"></span> Manzanero CUR 3D</label>
               <label><input type="checkbox" id="lyCtx" checked><span class="swf" style="background:var(--land-out)"></span> Partidos vecinos y río (solo sin mapa base)</label>
@@ -396,6 +429,7 @@ function render(){
   if(st.selKind==="tr"&&st.sel){const r=st.trById[st.sel];if(r&&r.parts.length){ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.setLineDash([10,5]);ctx.beginPath();for(const p of r.parts)pathLine(p,t);ctx.stroke();ctx.setLineDash([]);
     const a=r.parts[0],z=r.parts[r.parts.length-1];for(const [x,y] of [[a[0],a[1]],[z[z.length-2],z[z.length-1]]]){ctx.beginPath();ctx.arc(t.cx+x*s,t.cy-y*s,4.5,0,7);ctx.fillStyle=C.sel;ctx.fill()}}}
   if(ED.on){ctx.strokeStyle=C.accent;ctx.lineWidth=3.5;ctx.beginPath();for(const p of ED.parts){if(!p.length)continue;ctx.moveTo(t.cx+p[0][0]*s,t.cy-p[0][1]*s);for(let i=1;i<p.length;i++)ctx.lineTo(t.cx+p[i][0]*s,t.cy-p[i][1]*s)}ctx.stroke()}
+  if(st.ly.notas)for(const n of Object.values(st.notes||{})){if(!n||!n.pt||n.estado==="Resuelta")continue;const px=t.cx+n.pt[0]*s,py=t.cy-n.pt[1]*s;ctx.beginPath();ctx.moveTo(px,py-11);ctx.lineTo(px+7,py-4);ctx.lineTo(px,py+3);ctx.lineTo(px-7,py-4);ctx.closePath();ctx.fillStyle="#f2b705";ctx.fill();ctx.strokeStyle="#5a4300";ctx.lineWidth=1.5;ctx.stroke()}
   if(st.mark){ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,7,0,7);ctx.strokeStyle=C.sel;ctx.lineWidth=2.5;ctx.stroke();ctx.beginPath();ctx.arc(t.cx+st.mark[0]*s,t.cy-st.mark[1]*s,2,0,7);ctx.fillStyle=C.sel;ctx.fill()}
   labels(t,bb);
 }
@@ -428,7 +462,7 @@ function linksFor(x,y){const ll=U(x,y),la=ll.lat.toFixed(6),lo=ll.lng.toFixed(6)
 function inspect(h,x,y){const el=$("#insp");let html="";
   if(h&&h.k==="l"){const f=D.l[h.i];const trs=st.fid2tr[f.fid]||[],srs=st.fid2sr[f.fid]||[];const A=f.A||{};
     html=`<h3><span>${esc(f.tipo||"(sin tipo)")}${f.baja?' <span class="chip k-bad">dada de baja</span>':""}${f.nueva?' <span class="chip k-info">nueva</span>':""}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>SMP</dt><dd class="mono">${esc(A.SMP||"—")}</dd><dt>Sección · Mz · Parc.</dt><dd class="mono">${esc(A.SECCION||"—")} · ${esc(A.MANZANA||"—")} · ${esc(A.PARCELA||"—")}</dd><dt>OBS</dt><dd>${esc(A.OBS||"—")}</dd><dt>Plano</dt><dd>${esc(A.PLANO||"—")}</dd><dt>NRO_ORD</dt><dd>${esc(A.NRO_ORD||"—")}</dd><dt>TEXTO</dt><dd>${esc(A.TEXTO||"—")}</dd><dt>FID lineas07</dt><dd class="mono">${f.nueva?"nueva":f.fid}</dd><dt>Vínculo</dt><dd>${trs.map(id=>`<a href="#" data-go="tr" data-id="${id}">${id}</a>`).join(" ")||""}${srs.map(id=>`<a href="#" data-go="sr" data-id="${id}">${id} (sin respaldo)</a>`).join(" ")||(trs.length?"":"Sin tramo del CUR asociado")}</dd>${f.edit?`<dt>Última edición</dt><dd>${esc(f.edit.por||"")} · ${fmtD(f.edit.fecha)}</dd>`:""}</dl>
-    <div class="lbtns"><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button>${f.nueva?`<button class="btn sm" type="button" data-act="del" data-i="${h.i}" title="Borra por completo esta línea nueva">Eliminar línea</button>`:`<button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}" title="Queda marcada para dar de baja en lineas07">${f.baja?"Reincorporar":"Dar de baja"}</button>`}</div>`;
+    <div class="lbtns"><button class="btn sm" type="button" data-act="nota" data-i="${h.i}">+ Nota</button><button class="btn sm" type="button" data-act="attr" data-i="${h.i}">Editar atributos</button><button class="btn sm" type="button" data-act="geom" data-i="${h.i}">Editar geometría</button>${f.nueva?`<button class="btn sm" type="button" data-act="del" data-i="${h.i}" title="Borra por completo esta línea nueva">Eliminar línea</button>`:`<button class="btn sm" type="button" data-act="${f.baja?"alta":"baja"}" data-i="${h.i}" title="Queda marcada para dar de baja en lineas07">${f.baja?"Reincorporar":"Dar de baja"}</button>`}</div>`;
     st.hl=new Set([h.i]);}
   else if(h&&h.k==="tr"){const r=st.trById[h.id];select("tr",r.id,false);html=`<h3><span>${esc(r.id)} · ${esc(r.calle)}</span><button class="x" aria-label="Cerrar">×</button></h3><div>${esc(r.desde)} – ${esc(r.hasta)}</div><div style="margin-top:4px"><span class="chip ${estKind(est(r))}">${esc(estShort(est(r)))}</span></div>`}
   else if(h&&h.k==="e"){const f=D.ej[h.i];const a=f.alts;html=`<h3><span>${esc(f.name||"(sin nombre)")}</span><button class="x" aria-label="Cerrar">×</button></h3><dl class="kv"><dt>Tipo</dt><dd>${esc(f.tipo)}${f.boca?" · bocacalle":""}</dd>${a?`<dt>Alturas</dt><dd class="mono">der. ${a[0]}–${a[1]} · izq. ${a[2]}–${a[3]}</dd>`:""}</dl>`;st.hl=new Set()}
@@ -438,6 +472,7 @@ function inspect(h,x,y){const el=$("#insp");let html="";
 $("#insp").addEventListener("click",e=>{const ac=e.target.closest("[data-act]");if(ac){const i=+ac.dataset.i,f=D.l[i];if(!f)return;const c=st.mark||[f.parts[0][0],f.parts[0][1]];
     if(ac.dataset.act==="del"){if(ac.dataset.sure!=="1"){ac.dataset.sure="1";ac.textContent="¿Seguro? Tocá de nuevo para eliminar";ac.classList.add("danger");return}
       $("#insp").hidden=true;st.hl=new Set();st.mark=null;undoEdit("l",lineKey(f));say("Línea nueva eliminada");return}
+    if(ac.dataset.act==="nota"){newNoteFor({kind:"l",id:f.fid},c);return}
     if(ac.dataset.act==="attr")attrForm(i,c[0],c[1],false);else if(ac.dataset.act==="geom"){$("#insp").hidden=true;startEdit("l",f.fid)}
     else if(ac.dataset.act==="baja")saveEditL(lineKey(f),{baja:true},"Dada de baja");else if(ac.dataset.act==="alta")saveEditL(lineKey(f),{baja:false},"Reincorporada");
     if(ac.dataset.act==="baja"||ac.dataset.act==="alta")setTimeout(()=>{const j=D.lByFid.get(f.fid);if(j!==undefined)inspect({k:"l",i:j},c[0],c[1])},30);return}
@@ -494,12 +529,12 @@ $("#obsAll").addEventListener("click",e=>{e.preventDefault();setObsOff([])});
 $("#obsEst").addEventListener("click",e=>{e.preventDefault();const ks=new Set(D.l.map(obsKey));setObsOff([...ks].filter(k=>!k.startsWith("EN ESTUDIO")))});
 function legendTr(){const items=st.colorBy==="estado"?[["Completa","Completa"],["Completa en un solo lado","Un solo lado"],["Cargada (verificar extensión)","Cargada, verificar / parcial"],["No está en lineas07","No está en lineas07"],["Sin tramo (revisión manual)","Sin tramo u otro tipo"]].map(([e,n])=>[estColor(e),n]):REV_TR.map(v=>[revColor(v),v]);
   $("#lgTr").innerHTML=items.map(([c,n])=>`<label style="cursor:default"><span class="sw" style="border-color:${c};border-top-width:6px;opacity:.75"></span>${esc(n)}</label>`).join("")}
-[["#lyTr","tr"],["#lyEjes","ejes"],["#lyMz","mz"],["#lyCtx","ctx"]].forEach(([s,k])=>$(s).addEventListener("change",e=>{st.ly[k]=e.target.checked;draw()}));
+[["#lyNotas","notas"],["#lyTr","tr"],["#lyEjes","ejes"],["#lyMz","mz"],["#lyCtx","ctx"]].forEach(([s,k])=>$(s).addEventListener("change",e=>{st.ly[k]=e.target.checked;draw()}));
 $("#colEst").onclick=()=>{st.colorBy="estado";$("#colEst").setAttribute("aria-pressed","true");$("#colRev").setAttribute("aria-pressed","false");legendTr();draw()};
 $("#colRev").onclick=()=>{st.colorBy="rev";$("#colRev").setAttribute("aria-pressed","true");$("#colEst").setAttribute("aria-pressed","false");legendTr();draw()};
 
 /* ---------- tabs, filters, lists ---------- */
-function showTab(k){for(const b of document.querySelectorAll(".tabs button"))b.setAttribute("aria-selected",String(b.dataset.tab===k));for(const p of ["tr","sr","ed","ly"])$("#pane-"+p).hidden=p!==k}
+function showTab(k){for(const b of document.querySelectorAll(".tabs button"))b.setAttribute("aria-selected",String(b.dataset.tab===k));for(const p of ["tr","sr","ed","no","ly"])$("#pane-"+p).hidden=p!==k;if(k==="no")noteFormUI()}
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function buildFilters(){const ests=[...new Set([...st.tr.map(r=>estShort(r.estado)),...ESTADOS.map(estShort)])];$("#fEstado").innerHTML='<option value="">Todo estado</option>'+ests.map(e=>`<option>${esc(e)}</option>`).join("");
   $("#fRev").innerHTML='<option value="">Toda revisión</option>'+REV_TR.map(v=>`<option>${esc(v)}</option>`).join("");
@@ -549,7 +584,7 @@ function renderDetail(kind){const host=kind==="tr"?$("#detTr"):$("#detSr");const
     <ul class="hist" id="histList"></ul></div></div>`;
   host.innerHTML=h;host.hidden=false;host.scrollTop=0;
   host.dataset.id=r.id;host.dataset.dirty="";const mk=()=>{host.dataset.dirty="1"};["#revSel","#revObs","#revNorma","#revLink"].forEach(q=>$(q).addEventListener("input",mk));
-  $("#revSave").onclick=()=>saveRev(kind,r.id);fillHist(r.id);if(kind==="tr")wireTramoEdit(r);}
+  $("#revSave").onclick=()=>saveRev(kind,r.id);fillHist(r.id);if(kind==="tr")wireTramoEdit(r);noteBox(host,kind,r.id);}
 function fillHist(id){const ul=$("#histList");if(!ul)return;const items=((st.rev[id]&&st.rev[id].hist)||[]).slice(0,10);
   ul.innerHTML=items.map(h=>`<li><b>${esc(h.resultado)}</b> · ${h.fecha?new Date(h.fecha).toLocaleString("es-AR"):""} · ${esc(h.por||"—")}${h.norma?`<br>${esc(h.norma)}`:""}${h.obs?`<br>${esc(h.obs)}`:""}</li>`).join("")}
 let resumeSave=null;
@@ -598,14 +633,14 @@ async function fetchRemote(){
     if(r.status===401||r.status===403)throw new Error("GitHub rechazó el token: revisalo en ⚙.");
     throw new Error("GitHub respondió "+r.status)}
   const r=await fetch("data/revision.json?t="+Date.now(),{cache:"no-store"});if(!r.ok)throw new Error("No se pudo leer data/revision.json");return{data:await r.json(),sha:null}}
-function applyRemote(data){st.remote=(data&&data.items)||{};st.remL=(data&&data.lineas)||{};st.remT=(data&&data.tramos)||{};st.rev=Object.assign({},st.remote,st.pending);applyEdits();refreshAfterRev()}
+function applyRemote(data){st.remN=(data&&data.notas)||{};notesMerge();st.remote=(data&&data.items)||{};st.remL=(data&&data.lineas)||{};st.remT=(data&&data.tramos)||{};st.rev=Object.assign({},st.remote,st.pending);applyEdits();refreshAfterRev();notesUI()}
 function refreshAfterRev(){pendUI();if(!D.ready)return;renderLists();if(st.sel){const host=st.selKind==="tr"?$("#detTr"):$("#detSr");if(!(host.dataset.dirty&&host.dataset.id===st.sel))renderDetail(st.selKind)}draw()}
-function pendUI(){const n=Object.keys(st.pending).length+Object.keys(st.pendL||{}).length+Object.keys(st.pendT||{}).length;$("#pendN").textContent=n;$("#pendN").hidden=!n;const ro=$("#roNote");
+function pendUI(){const n=Object.keys(st.pendN||{}).length+Object.keys(st.pending).length+Object.keys(st.pendL||{}).length+Object.keys(st.pendT||{}).length;$("#pendN").textContent=n;$("#pendN").hidden=!n;const ro=$("#roNote");
   if(!(cfg.token&&cfg.owner&&cfg.repo)){ro.hidden=false;ro.textContent=n?`Tenés ${n} cambio(s) guardados solo en este navegador. Configurá el token en ⚙ para publicarlas, o descargá revision.json desde ⚙ y subilo al repositorio.`:"Podés ver todo. Para publicar revisiones en el repositorio, configurá tu nombre y tu token de GitHub en ⚙."}
   else{ro.hidden=!n;ro.textContent=n?`${n} cambio(s) sin publicar: tocá «Guardar en GitHub».`:""}}
 async function reload(quiet){try{const {data}=await fetchRemote();applyRemote(data);if(!quiet)say("Revisiones y ediciones actualizadas")}catch(e){applyRemote({items:st.remote,lineas:st.remL,tramos:st.remT});say(e.message)}}
 let publishing=false;
-async function publish(){if(publishing)return;const ids=Object.keys(st.pending),kL=Object.keys(st.pendL),kT=Object.keys(st.pendT);if(!ids.length&&!kL.length&&!kT.length){say("No hay cambios pendientes de publicar");return}
+async function publish(){if(publishing)return;const ids=Object.keys(st.pending),kL=Object.keys(st.pendL),kT=Object.keys(st.pendT),kN=Object.keys(st.pendN);if(!ids.length&&!kL.length&&!kT.length&&!kN.length){say("No hay cambios pendientes de publicar");return}
   if(!cfg.owner||!cfg.repo||!cfg.token){openCfg("Completá el repositorio y el token para publicar.");return}
   publishing=true;$("#syncBtn").disabled=true;say("Publicando en GitHub…");let msgOut="";
   try{for(let attempt=0;attempt<3;attempt++){const {data,sha}=await fetchRemote();const items=Object.assign({},(data&&data.items)||{});
@@ -615,11 +650,12 @@ async function publish(){if(publishing)return;const ids=Object.keys(st.pending),
       const lineas=Object.assign({},(data&&data.lineas)||{}),tramos=Object.assign({},(data&&data.tramos)||{});
       for(const k of kL){if(st.pendL[k]===null)delete lineas[k];else lineas[k]=st.pendL[k]}
       for(const k of kT){if(st.pendT[k]===null)delete tramos[k];else tramos[k]=st.pendT[k]}
-      const body={actualizado:new Date().toISOString(),items,lineas,tramos};
-      const parts=[...ids.map(i=>`Revisión ${i}: ${st.pending[i].resultado}`),...kT.map(k=>st.pendT[k]===null?`Deshacer edición ${k}`:`${k}: ${(st.pendT[k].hist&&st.pendT[k].hist[0]&&st.pendT[k].hist[0].accion)||"edición"}`),...kL.map(k=>st.pendL[k]===null?`Deshacer edición lineas07 ${k}`:`lineas07 ${k[0]==="f"?"FID "+k.slice(1):"nueva"}: ${(st.pendL[k].hist&&st.pendL[k].hist[0]&&st.pendL[k].hist[0].accion)||"edición"}`)];
+      const notas=Object.assign({},(data&&data.notas)||{});for(const k of kN){if(st.pendN[k]===null)delete notas[k];else notas[k]=st.pendN[k]}
+      const body={actualizado:new Date().toISOString(),items,lineas,tramos,notas};
+      const parts=[...kN.map(k=>st.pendN[k]===null?"Nota borrada":`Nota (${st.pendN[k].estado}): ${st.pendN[k].texto.replace(/\s+/g," ").slice(0,50)}`),...ids.map(i=>`Revisión ${i}: ${st.pending[i].resultado}`),...kT.map(k=>st.pendT[k]===null?`Deshacer edición ${k}`:`${k}: ${(st.pendT[k].hist&&st.pendT[k].hist[0]&&st.pendT[k].hist[0].accion)||"edición"}`),...kL.map(k=>st.pendL[k]===null?`Deshacer edición lineas07 ${k}`:`lineas07 ${k[0]==="f"?"FID "+k.slice(1):"nueva"}: ${(st.pendL[k].hist&&st.pendL[k].hist[0]&&st.pendL[k].hist[0].accion)||"edición"}`)];
       const msg=(parts.length<=2?parts.join("; "):`${parts.length} cambios: ${parts.slice(0,2).join("; ")}…`)+` (${cfg.nombre||"sin nombre"})`;
       const r=await api("contents/data/revision.json",{method:"PUT",body:JSON.stringify(Object.assign({message:msg,content:b64e(JSON.stringify(body,null,1)),branch:cfg.branch||"main"},sha?{sha}:{}))});
-      if(r.ok){st.pending={};st.pendL={};st.pendT={};LS.set("l07pending",{});LS.set("l07pendL",{});LS.set("l07pendT",{});applyRemote(body);msgOut="Publicado en GitHub. El sitio lo muestra a los demás en uno o dos minutos.";return}
+      if(r.ok){st.pendN={};LS.set("l07pendN",{});st.pending={};st.pendL={};st.pendT={};LS.set("l07pending",{});LS.set("l07pendL",{});LS.set("l07pendT",{});applyRemote(body);msgOut="Publicado en GitHub. El sitio lo muestra a los demás en uno o dos minutos.";return}
       if((r.status===409||r.status===422)&&attempt<2)continue;
       if(r.status===401||r.status===403)throw new Error("GitHub rechazó el token: tiene que tener permiso «Contents: Read and write» sobre este repositorio.");
       if(r.status===404)throw new Error("No encontré el repositorio o la rama: revisá la configuración en ⚙.");
@@ -637,7 +673,7 @@ $("#cfgTest").onclick=async()=>{readCfgForm();const m=$("#cfgMsg");if(!cfg.owner
   try{const r=await api("");if(!r.ok){m.textContent=r.status===404?"No encontré el repositorio (o el token no tiene acceso a él).":r.status===401?"El token no es válido.":"GitHub respondió "+r.status;return}
     const j=await r.json();m.textContent=j.permissions&&j.permissions.push?`Conexión correcta con ${j.full_name}: podés publicar revisiones.`:cfg.token?`Veo ${j.full_name}, pero el token no tiene permiso de escritura.`:`Veo ${j.full_name}. Sin token solo podés leer.`}
   catch(e){m.textContent="No se pudo conectar con GitHub."}};
-$("#cfgDl").onclick=()=>downloadFile("revision.json",JSON.stringify({actualizado:new Date().toISOString(),items:st.rev,lineas:st.edL,tramos:st.edT},null,1),"application/json");
+$("#cfgDl").onclick=()=>downloadFile("revision.json",JSON.stringify({actualizado:new Date().toISOString(),items:st.rev,lineas:st.edL,tramos:st.edT,notas:st.notes},null,1),"application/json");
 $("#syncBtn").onclick=publish;$("#reloadBtn").onclick=()=>reload(false);
 function downloadFile(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000)}
 
@@ -660,7 +696,7 @@ const fmtD=d=>d?new Date(d).toLocaleString("es-AR"):"";
 const ESTADOS=["Completa","Completa en un solo lado","Cargada (verificar extensión)","Parcial","No está en lineas07","Cargada con otro tipo","Sin tramo (revisión manual)"];
 const EXPF={"5.4":"part","5.5 a1":"afec","5.5 a2":"afec","5.5 b":"aper"};
 const FAMNAME={part:"PART",afec:"AFEC",aper:"APER",serv:"SERV",rect:"RECT",otro:"OTRO"};
-st.pendL=LS.get("l07pendL",{});st.pendT=LS.get("l07pendT",{});st.remL={};st.remT={};st.edL={};st.edT={};
+st.pendN=LS.get("l07pendN",{});st.remN={};st.notes={};st.ly.notas=true;st.pendL=LS.get("l07pendL",{});st.pendT=LS.get("l07pendT",{});st.remL={};st.remT={};st.edL={};st.edT={};
 
 /* ---------- geometry utils ---------- */
 function segX(ax,ay,bx,by,cx,cy,dx,dy){const r1=bx-ax,r2=by-ay,s1=dx-cx,s2=dy-cy,den=r1*s2-r2*s1;if(Math.abs(den)<1e-12)return null;const t=((cx-ax)*s2-(cy-ay)*s1)/den,u=((cx-ax)*r2-(cy-ay)*r1)/den;return(t>=0&&t<=1&&u>=0&&u<=1)?t:null}
@@ -891,6 +927,52 @@ $("#edBar").addEventListener("click",e=>{const b=e.target.closest("button");if(!
 $("#edSnap").addEventListener("change",e=>{ED.snap=e.target.checked});
 document.addEventListener("keydown",e=>{if(!ED.on)return;if((e.key==="Delete"||e.key==="Backspace")&&ED.sel&&!/INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)){e.preventDefault();delVertex(ED.sel[0],ED.sel[1])}if(e.key==="Escape"){ED.sel=null;handles()}});
 
+/* ---------- notas ---------- */
+const NKIND={Estudiar:"k-nE",Preguntar:"k-nP",Corregir:"k-nC",Otro:""};
+let noteDraftRef=null,noteDraftPt=null;
+function notesMerge(){st.notes={};for(const [k,v] of Object.entries(Object.assign({},st.remN||{},st.pendN||{})))if(v)st.notes[k]=v}
+function refLabel(ref){if(!ref)return"";if(ref.kind==="tr"){const r=st.trById[ref.id];return `${ref.id}${r?" · "+r.calle:""}`}if(ref.kind==="sr"){const r=st.srById[ref.id];return `${ref.id}${r?" · "+srTitle(r):""}`}if(ref.kind==="l"){const i=D.lByFid?D.lByFid.get(ref.id):undefined;const f=i===undefined?null:D.l[i];return `lineas07 ${typeof ref.id==="number"?"FID "+ref.id:"(nueva)"}${f&&f.A&&f.A.SMP?" · SMP "+f.A.SMP:""}`}return""}
+function curRef(){if(noteDraftRef)return noteDraftRef;if(st.sel&&st.selKind)return {kind:st.selKind,id:st.sel};return null}
+function noteFormUI(){const ref=curRef(),pt=noteDraftPt||st.mark;$("#noRefL").hidden=!ref;if(ref)$("#noRefTxt").textContent="Vincular a "+refLabel(ref);$("#noPtL").hidden=!pt}
+function newNoteFor(ref,pt){noteDraftRef=ref;noteDraftPt=pt||null;showTab("no");$("#noRef").checked=true;$("#noPt").checked=!!pt;noteFormUI();$("#noTxt").focus()}
+function saveNote(id,rec,accion){if(needName(()=>saveNote(id,rec,accion)))return;
+  st.pendN[id]=rec===null?null:Object.assign({},rec,{por:cfg.nombre,fecha:nowISO()});LS.set("l07pendN",st.pendN);notesUI();pendUI();
+  if(st.sel)renderDetail(st.selKind);draw();if(cfg.token&&cfg.owner&&cfg.repo)publish();else say("Nota guardada en este navegador. Falta publicarla en GitHub.")}
+$("#noteForm").addEventListener("submit",e=>{e.preventDefault();const tx=$("#noTxt").value.trim();if(!tx)return;
+  const ref=!$("#noRefL").hidden&&$("#noRef").checked?curRef():null,pt0=noteDraftPt||st.mark,pt=!$("#noPtL").hidden&&$("#noPt").checked&&pt0?[Math.round(pt0[0]*10)/10,Math.round(pt0[1]*10)/10]:null;
+  const tipo=$("#noTipo").value,para=$("#noPara").value.trim();
+  const go=()=>{saveNote("N"+Date.now().toString(36),{texto:tx,tipo,para,estado:"Pendiente",ref,pt,creado:nowISO(),creadoPor:cfg.nombre},"alta");$("#noTxt").value="";$("#noPara").value="";noteDraftRef=null;noteDraftPt=null;noteFormUI()};
+  if(needName(go))return;go()});
+for(const q of ["#fNoEst","#fNoTipo","#fNoTxt"])$(q).addEventListener("input",notesUI);
+function notesUI(){notesMerge();const all=Object.entries(st.notes).sort((a,b)=>(b[1].creado||"").localeCompare(a[1].creado||""));
+  const np=all.filter(([,n])=>n.estado!=="Resuelta").length;$("#nNo").textContent=np||"";
+  const fe=$("#fNoEst").value,ft=$("#fNoTipo").value,fx=norm($("#fNoTxt").value);
+  const rows=all.filter(([,n])=>(!fe||n.estado===fe)&&(!ft||n.tipo===ft)&&(!fx||norm([n.texto,n.para,n.resp,refLabel(n.ref),n.creadoPor].join(" ")).includes(fx)));
+  $("#listNo").innerHTML=rows.length?rows.map(([id,n])=>noteCard(id,n)).join(""):`<div class="empty">${all.length?"No hay notas con ese filtro.":"Todavía no hay notas. Escribí arriba lo que quieras estudiar o preguntar después."}</div>`}
+function noteCard(id,n){const pend=id in (st.pendN||{})?' <span class="chip k-warn">sin publicar</span>':"";
+  return `<div class="ncard${n.estado==="Resuelta"?" res":""}" data-nid="${id}"><div><span class="chip ${NKIND[n.tipo]||""}">${esc(n.tipo)}</span> <span class="chip ${n.estado==="Resuelta"?"k-ok":"k-warn"}">${esc(n.estado)}</span>${n.para?` <span class="chip">para: ${esc(n.para)}</span>`:""}${pend}</div>
+  <div class="ntx">${esc(n.texto)}</div>${n.ref||n.pt?`<div class="nmeta">${n.ref?`<a href="#" data-nact="go">${esc(refLabel(n.ref))}</a>`:""}${n.pt?`${n.ref?" · ":""}<a href="#" data-nact="pt">ver punto en el mapa</a>`:""}</div>`:""}
+  ${n.resp?`<div class="nres"><b>Resolución:</b> ${esc(n.resp)}</div>`:""}
+  <div class="nmeta">${esc(n.creadoPor||n.por||"")} · ${fmtD(n.creado)}${n.fecha&&n.fecha!==n.creado?` · último cambio: ${esc(n.por||"")} ${fmtD(n.fecha)}`:""}</div>
+  <div class="lbtns">${n.estado==="Resuelta"?`<button class="btn sm" type="button" data-nact="reopen">Reabrir</button>`:`<button class="btn sm" type="button" data-nact="resolve">Resolver</button>`}<button class="btn sm" type="button" data-nact="edit">Editar</button><button class="btn sm" type="button" data-nact="del">Borrar</button></div></div>`}
+$("#listNo").addEventListener("click",e=>{const b=e.target.closest("[data-nact]");if(!b)return;e.preventDefault();const card=b.closest("[data-nid]"),id=card.dataset.nid,n=st.notes[id];if(!n)return;const a=b.dataset.nact;
+  if(a==="go"){const r=n.ref;if(r.kind==="tr"||r.kind==="sr"){showTab(r.kind);select(r.kind,r.id,true)}else{const i=D.lByFid.get(r.id);if(i!==undefined){const f=D.l[i];fitBB(f.bb);const c=n.pt||[f.parts[0][0],f.parts[0][1]];st.mark=c;inspect({k:"l",i},c[0],c[1]);draw()}else say("Esa línea ya no está en lineas07.")}}
+  else if(a==="pt"){map.setView(U(n.pt[0],n.pt[1]),18);st.mark=n.pt;draw()}
+  else if(a==="del"){if(b.dataset.sure!=="1"){b.dataset.sure="1";b.textContent="¿Seguro? Tocá de nuevo";b.classList.add("danger");return}saveNote(id,null,"baja")}
+  else if(a==="reopen")saveNote(id,Object.assign({},n,{estado:"Pendiente"}),"reabrir");
+  else if(a==="resolve"||a==="edit"){if(card.querySelector("form"))return;const f=document.createElement("form");f.className="attr";
+    f.innerHTML=a==="resolve"?`<label>Resolución o respuesta (opcional)<textarea data-f="resp" rows="3">${esc(n.resp||"")}</textarea></label><div class="act"><button class="btn sm primary" type="submit">Marcar resuelta</button><button class="btn sm" type="button" data-x>Cancelar</button></div>`
+      :`<label>Nota<textarea data-f="texto" rows="3">${esc(n.texto)}</textarea></label><div class="row2"><label>Tipo<select data-f="tipo">${["Estudiar","Preguntar","Corregir","Otro"].map(t=>`<option ${t===n.tipo?"selected":""}>${t}</option>`).join("")}</select></label><label>Para<input data-f="para" value="${esc(n.para||"")}"></label></div>${n.estado==="Resuelta"?`<label>Resolución<textarea data-f="resp" rows="2">${esc(n.resp||"")}</textarea></label>`:""}<div class="act"><button class="btn sm primary" type="submit">Guardar</button><button class="btn sm" type="button" data-x>Cancelar</button></div>`;
+    card.appendChild(f);f.querySelector("textarea").focus();f.querySelector("[data-x]").onclick=()=>f.remove();
+    f.onsubmit=ev=>{ev.preventDefault();const v={};f.querySelectorAll("[data-f]").forEach(q=>v[q.dataset.f]=q.value.trim());if(a==="edit"&&!v.texto)return;
+      saveNote(id,Object.assign({},n,v,a==="resolve"?{estado:"Resuelta",resuelta:nowISO(),resueltaPor:cfg.nombre}:{}),a)}}});
+function noteBox(host,kind,id){const L=Object.entries(st.notes||{}).filter(([,n])=>n.ref&&n.ref.kind===kind&&n.ref.id===id);const d=document.createElement("div");d.className="notebox";
+  d.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b style="font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Notas${L.length?" ("+L.length+")":""}</b><button class="btn sm" type="button">+ Nota sobre ${esc(id)}</button></div>${L.length?`<ul>${L.map(([,n])=>`<li><span class="chip ${n.estado==="Resuelta"?"k-ok":"k-warn"}">${esc(n.estado)}</span> <b>${esc(n.tipo)}:</b> ${esc(n.texto)}${n.resp?` <i>— ${esc(n.resp)}</i>`:""}</li>`).join("")}</ul>`:""}`;
+  d.querySelector("button").onclick=()=>newNoteFor({kind,id},st.mark);(host.querySelector(".detail-in")||host).appendChild(d)}
+$("#noCsv").onclick=()=>{const q=v=>{v=String(v??"");return /[;"\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};const ll=pt=>{if(!pt)return["",""];const w=U(pt[0],pt[1]),g=fromLL(w.lat,w.lng);return g?[g[0].toFixed(2),g[1].toFixed(2)]:["",""]};
+  const rows=[["Tipo","Estado","Nota","Para","Vinculada a","X PG07","Y PG07","Creada por","Fecha","Resolución","Resuelta por","Fecha resolución"]];
+  for(const n of Object.values(st.notes).sort((a,b)=>(a.creado||"").localeCompare(b.creado||""))){const [x,y]=ll(n.pt);rows.push([n.tipo,n.estado,n.texto,n.para,refLabel(n.ref),x,y,n.creadoPor,fmtD(n.creado),n.resp,n.resueltaPor,fmtD(n.resuelta)])}
+  downloadFile("notas_visor_lineas07.csv","﻿"+rows.map(r=>r.map(q).join(";")).join("\r\n"),"text/csv;charset=utf-8")};
 /* ---------- base map selector ---------- */
 $("#lgBase").innerHTML=BASES.map(([k,n])=>`<label><input type="radio" name="base" value="${k}"> ${esc(n)}</label>`).join("");
 $("#lgBase").addEventListener("change",e=>{if(e.target.name==="base")setBase(e.target.value)});

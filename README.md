@@ -74,6 +74,18 @@ Cada afectación que estudiás se registra en su ficha del visor. Cada registro 
    - Con **CSV** bajás la tabla completa para el informe.
 7. **Consultá el procedimiento completo en GitHub.** En el repositorio, la pestaña **Commits** muestra cada revisión publicada, con fecha y autor. El historial de `data/revision.json` muestra qué cambió en cada paso.
 
+## Notas para estudiar o preguntar después
+
+La pestaña **Notas** es una lista de pendientes compartida:
+
+- Escribí la nota, elegí el tipo (**Estudiar**, **Preguntar**, **Corregir** u **Otro**) y, si querés, a quién hay que preguntarle.
+- Si tenés un tramo o grupo seleccionado, la nota queda vinculada a él. Si marcaste un punto en el mapa, también queda vinculada a ese punto y se ve como un rombo amarillo mientras esté pendiente.
+- Desde la ficha de un tramo (**+ Nota sobre CUR-0xx**) o desde una línea de lineas07 (**+ Nota**) se crea la nota ya vinculada.
+- Cada nota se puede **Resolver** (con la respuesta o conclusión), **Reabrir**, **Editar** o **Borrar**. La pestaña muestra las pendientes; el filtro permite ver las resueltas o todas.
+- **CSV** descarga todas las notas, con coordenadas en CABA-PG07.
+
+Las notas se guardan en `data/revision.json`, igual que las revisiones.
+
 ## Editar tramos y lineas07 desde el visor
 
 Todas las ediciones se guardan en `data/revision.json` junto con las revisiones (con token se publican al instante; sin token quedan en el navegador hasta «Guardar en GitHub»). Cada cambio queda en el historial y se puede deshacer desde la pestaña **Ediciones**.
