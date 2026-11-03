@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-03T18:37:23.306Z",
+ "actualizado": "2026-11-03T18:38:38.402Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -540,6 +540,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-11-03T18:30:42.121Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-104": {
+   "resultado": "Correcto",
+   "obs": "Apertura bajo vias del ferrocarril realizadas.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-11-03T18:38:37.223Z",
    "kind": "tr",
    "hist": []
   }
