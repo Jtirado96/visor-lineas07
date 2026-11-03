@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-03T19:16:25.038Z",
+ "actualizado": "2026-11-03T19:16:45.781Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -571,6 +571,16 @@
      "fecha": "2026-11-03T19:14:45.660Z"
     }
    ]
+  },
+  "CUR-112": {
+   "resultado": "Sin revisar",
+   "obs": "Apertura de calle bajo vias de ferrocarril materializado.",
+   "norma": "",
+   "link": "",
+   "por": "Junior",
+   "fecha": "2026-11-03T19:16:45.138Z",
+   "kind": "tr",
+   "hist": []
   }
  },
  "lineas": {},
