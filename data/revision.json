@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-05T17:01:39.685Z",
+ "actualizado": "2026-11-05T18:39:13.675Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -2668,6 +2668,24 @@
    "creadoPor": "Junior",
    "por": "Junior",
    "fecha": "2026-10-29T21:32:09.977Z"
+  },
+  "Nmw3w3gpg": {
+   "texto": "Apertura de calle parcial, verificar poligono de manzanero.",
+   "tipo": "Estudiar",
+   "para": "",
+   "estado": "Pendiente",
+   "ref": {
+    "kind": "tr",
+    "id": "CUR-072"
+   },
+   "pt": [
+    -6511798.1,
+    -4113319.1
+   ],
+   "creado": "2026-11-05T18:39:12.724Z",
+   "creadoPor": "Junior",
+   "por": "Junior",
+   "fecha": "2026-11-05T18:39:12.724Z"
   }
  }
 }
