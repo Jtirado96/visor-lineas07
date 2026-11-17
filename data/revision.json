@@ -1,5 +1,5 @@
 {
- "actualizado": "2026-11-17T15:01:03.506Z",
+ "actualizado": "2026-11-17T15:01:44.188Z",
  "items": {
   "CUR-093": {
    "resultado": "Falta cargar en lineas07",
@@ -589,6 +589,16 @@
    "link": "",
    "por": "Junior",
    "fecha": "2026-11-05T21:28:59.058Z",
+   "kind": "tr",
+   "hist": []
+  },
+  "CUR-122": {
+   "resultado": "Correcto",
+   "obs": "Apertura de calle roma realizada.",
+   "norma": "ORDENANZA 25391 1970",
+   "link": "https://boletinoficialpdf.buenosaires.gob.ar/util/imagen.php?idn=838241&idf=1",
+   "por": "Junior",
+   "fecha": "2026-11-17T15:01:43.212Z",
    "kind": "tr",
    "hist": []
   }
